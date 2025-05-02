@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaShieldAlt, FaUserLock, FaCookieBite, FaChevronDown, FaChevronUp, FaClipboard } from 'react-icons/fa';
-import SEO from '../components/SEO';
-import productData from '../utils/data/product';
+import SEO from '../../components/SEO';
+import productData from '../../utils/data/page_data';
 
 const Privacy = () => {
   const location = useLocation();
@@ -12,8 +12,8 @@ const Privacy = () => {
   const [activeSection, setActiveSection] = useState('');
 
   // Get data from product.js
-  const banners = productData.privacyBanner;
-  const privacyPolicy = productData.privacyPolicy;
+  const banners = productData.privacyBanner || [];
+  const privacyPolicy = productData.privacyPolicy || [];
 
   // Scroll to top when component mounts
   useEffect(() => {

@@ -34,7 +34,7 @@ const Card4 = ({ product }) => {
                     />
                     
                     {/* Features grid - 2 columns on mobile, 2x2 grid on larger screens */}
-                    <div className='grid grid-cols-2 gap-2 sm:gap-4 md:gap-6'>
+                    {/* <div className='grid grid-cols-2 gap-2 sm:gap-4 md:gap-6'>
                         {product.features.map((feature) => (
                             <div key={feature.id} className='flex items-center space-x-2'>
                                 <img 
@@ -45,7 +45,7 @@ const Card4 = ({ product }) => {
                                 <p className="text-xs sm:text-sm md:text-base">{feature.title}</p>
                             </div>
                         ))}
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="mt-4 sm:mt-6">

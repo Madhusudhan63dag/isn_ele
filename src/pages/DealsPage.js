@@ -272,7 +272,7 @@ const DealsPage = () => {
           </div>
 
           {/* Deal Advantages */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div className="bg-white p-4 rounded-lg shadow-sm flex items-center">
               <div className="p-3 bg-blue-100 rounded-full mr-4">
                 <FaTruckMoving className="text-blue-600 text-xl" />
@@ -282,7 +282,7 @@ const DealsPage = () => {
                 <p className="text-sm text-gray-500">On orders above ₹1000</p>
               </div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm flex items-center">
+            {/* <div className="bg-white p-4 rounded-lg shadow-sm flex items-center">
               <div className="p-3 bg-blue-100 rounded-full mr-4">
                 <FaShieldAlt className="text-blue-600 text-xl" />
               </div>
@@ -290,7 +290,7 @@ const DealsPage = () => {
                 <h4 className="font-medium">Extended Warranty</h4>
                 <p className="text-sm text-gray-500">Additional protection</p>
               </div>
-            </div>
+            </div> */}
             <div className="bg-white p-4 rounded-lg shadow-sm flex items-center">
               <div className="p-3 bg-blue-100 rounded-full mr-4">
                 <FaCheckCircle className="text-blue-600 text-xl" />
@@ -452,7 +452,7 @@ const DealsPage = () => {
         )}
         
         {/* More deals suggestion */}
-        <div className="mt-16">
+        {/* <div className="mt-16">
           <h3 className="text-2xl font-bold mb-6 text-center">More Deals You Might Like</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {Object.entries(dealMap)
@@ -466,7 +466,7 @@ const DealsPage = () => {
                 >
                   <div className="h-40 overflow-hidden">
                     <img 
-                      src={deal.banners[0].imageUrl} 
+                      src={deal.banners && deal.banners.length > 0 ? deal.banners[0].imageUrl : "https://placehold.co/600x400/e2e8f0/64748b?text=Deal+Image"} 
                       alt={deal.title} 
                       className="w-full h-full object-cover"
                     />
@@ -481,7 +481,7 @@ const DealsPage = () => {
                 </div>
               ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

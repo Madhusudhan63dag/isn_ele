@@ -6,18 +6,31 @@ import two from '../utils/image/payment_icon/two.png'
 import three from '../utils/image/payment_icon/three.png'
 import four from '../utils/image/payment_icon/four.png'
 import logo from '../utils/image/navbar_logo.png'
+import navbar from '../utils/data/navbar'; // Import the centralized navigation data
 
 const Footer = () => {
   const [showCopyPopup, setShowCopyPopup] = useState(false);
+  const [showPhonePopup, setShowPhonePopup] = useState(false);
   const emailRef = useRef(null);
+  const phoneRef = useRef(null);
 
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText('contact@techstore.com');
+    navigator.clipboard.writeText('israelitesshopping171@gmail.com');
     setShowCopyPopup(true);
     
     // Hide popup after 2 seconds
     setTimeout(() => {
       setShowCopyPopup(false);
+    }, 2000);
+  };
+
+  const handleCopyPhone = () => {
+    navigator.clipboard.writeText('+91 (903) 094-5444');
+    setShowPhonePopup(true);
+    
+    // Hide popup after 2 seconds
+    setTimeout(() => {
+      setShowPhonePopup(false);
     }, 2000);
   };
 
@@ -35,62 +48,57 @@ const Footer = () => {
                   <img src={logo} alt="Tech Store" className="h-12 mb-4" />
                 </Link>
                 <p className="text-gray-400 text-sm">
-                  Your one-stop destination for quality tech products. We offer the latest gadgets and electronics with exceptional service.
+                  Your one-stop destination for quality products. We offer the latest gadgets and electronics with exceptional service.
                 </p>
               </div>
               <div>
                 <h4 className="text-base font-medium mb-3 text-white">Contact Us</h4>
                 <ul className="space-y-2 text-sm text-gray-400">
-                  <li className="flex items-center">
+                  <li className="flex items-center relative" ref={phoneRef}>
                     <Phone size={16} className="mr-2 text-gray-500" />
-                    <span>1-800-TECH-HELP</span>
+                    <span 
+                      onClick={handleCopyPhone}
+                      className="cursor-pointer hover:text-text-orange-500 transition-colors"
+                      title="Click to copy phone number"
+                    >+91 (903) 094-5444</span>
+                    {showPhonePopup && (
+                      <div className="absolute -top-8 left-28 transform -translate-x-1/2 bg-orange-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                        Phone number copied!
+                      </div>
+                    )}
                   </li>
                   <li className="flex items-center">
                     <Mail size={16} className="mr-2 text-gray-500" />
-                    <span>contact@techstore.com</span>
+                    <span>israelitesshopping171@gmail.com</span>
                   </li>
                   <li className="flex items-start">
                     <MapPin size={16} className="mr-2 text-gray-500 mt-1" />
-                    <span>123 Tech Plaza, Silicon Valley, CA 94043</span>
+                    <span>Begumpet, Hyderabad, Telangana 500016</span>
                   </li>
                 </ul>
               </div>
             </div>
 
-            {/* Shop Links */}
+            {/* Shop Links - Updated to use navbar data */}
             <div>
               <h4 className="text-base font-medium mb-4 pb-2 border-b border-[#333] text-white">Shop By Category</h4>
               <ul className="space-y-2">
-                <li>
-                  <Link to="/trending?category=smartphones" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
-                    <ChevronRight size={14} className="mr-1" /> 
-                    <span>Smartphones & Accessories</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/trending?category=laptops" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
-                    <ChevronRight size={14} className="mr-1" /> 
-                    <span>Laptops & Computers</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/trending?category=audio" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
-                    <ChevronRight size={14} className="mr-1" /> 
-                    <span>Audio & Headphones</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/trending?category=gaming" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
-                    <ChevronRight size={14} className="mr-1" /> 
-                    <span>Gaming & Consoles</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/trending?category=wearables" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
-                    <ChevronRight size={14} className="mr-1" /> 
-                    <span>Wearable Tech</span>
-                  </Link>
-                </li>
+                {navbar[0].subItems.map(item => (
+                  <li key={item.id}>
+                    <Link to={item.link} className="text-gray-400 hover:text-orange-500 transition-colors flex items-center">
+                      <ChevronRight size={14} className="mr-1" /> 
+                      <span>{item.name}</span>
+                    </Link>
+                  </li>
+                ))}
+                {navbar[1].subItems.map(item => (
+                  <li key={`deal-${item.id}`}>
+                    <Link to={item.link} className="text-gray-400 hover:text-orange-500 transition-colors flex items-center">
+                      <ChevronRight size={14} className="mr-1" /> 
+                      <span>{item.name}</span>
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -98,34 +106,24 @@ const Footer = () => {
             <div>
               <h4 className="text-base font-medium mb-4 pb-2 border-b border-[#333] text-white">Customer Service</h4>
               <ul className="space-y-2">
-                {/* <li>
-                  <Link to="/help" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
-                    <ChevronRight size={14} className="mr-1" /> 
-                    <span>Help Center</span>
-                  </Link>
-                </li>
+                {/* {navbar[2].subItems.map(item => (
+                  <li key={`support-${item.id}`}>
+                    <Link to={item.link} className="text-gray-400 hover:text-orange-500 transition-colors flex items-center">
+                      <ChevronRight size={14} className="mr-1" /> 
+                      <span>{item.name}</span>
+                    </Link>
+                  </li>
+                ))} */}
                 <li>
-                  <Link to="/shipping" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
+                  <Link to="/shipping" className="text-gray-400 hover:text-orange-500 transition-colors flex items-center">
                     <ChevronRight size={14} className="mr-1" /> 
                     <span>Shipping Information</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/shipping" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
+                  <Link to="/terms" className="text-gray-400 hover:text-orange-500 transition-colors flex items-center">
                     <ChevronRight size={14} className="mr-1" /> 
-                    <span>Returns & Exchanges</span>
-                  </Link>
-                </li> */}
-                <li>
-                  <Link to="/faq" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
-                    <ChevronRight size={14} className="mr-1" /> 
-                    <span>FAQ</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/contact" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
-                    <ChevronRight size={14} className="mr-1" /> 
-                    <span>Contact Us</span>
+                    <span>Return Policy</span>
                   </Link>
                 </li>
               </ul>
@@ -136,19 +134,19 @@ const Footer = () => {
               <h4 className="text-base font-medium mb-4 pb-2 border-b border-[#333] text-white">About & Connect</h4>
               <ul className="space-y-2 mb-6">
                 <li>
-                  <Link to="/about" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
+                  <Link to="/about" className="text-gray-400 hover:text-orange-500 transition-colors flex items-center">
                     <ChevronRight size={14} className="mr-1" /> 
                     <span>About Us</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/terms" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
+                  <Link to="/terms" className="text-gray-400 hover:text-orange-500 transition-colors flex items-center">
                     <ChevronRight size={14} className="mr-1" /> 
                     <span>Terms & Conditions</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/privacy" className="text-gray-400 hover:text-[#0062ff] transition-colors flex items-center">
+                  <Link to="/privacy" className="text-gray-400 hover:text-orange-500 transition-colors flex items-center">
                     <ChevronRight size={14} className="mr-1" /> 
                     <span>Privacy Policy</span>
                   </Link>
@@ -158,19 +156,19 @@ const Footer = () => {
               <div className="mb-6">
                 <h4 className="text-base font-medium mb-3 text-white">Connect With Us</h4>
                 <div className="flex space-x-3">
-                  <a href="#" className="w-8 h-8 rounded-full bg-[#262626] hover:bg-[#0062ff] flex items-center justify-center transition-colors">
+                  <a href="https://www.facebook.com/people/Iandicompany-Ele/pfbid06gGxGPRZef5P714qioE5TPMWWxuCa9W9ehMsUXcUsmMLZdKAKhA8MXSvKF22nJvDl/" className="w-8 h-8 rounded-full bg-[#262626] hover:bg-orange-500 flex items-center justify-center transition-colors">
                     <Facebook size={16} />
                   </a>
-                  <a href="#" className="w-8 h-8 rounded-full bg-[#262626] hover:bg-[#0062ff] flex items-center justify-center transition-colors">
+                  <a href="https://www.instagram.com/myiandiofficial/" className="w-8 h-8 rounded-full bg-[#262626] hover:bg-orange-500 flex items-center justify-center transition-colors">
                     <Instagram size={16} />
                   </a>
-                  <a href="#" className="w-8 h-8 rounded-full bg-[#262626] hover:bg-[#0062ff] flex items-center justify-center transition-colors">
+                  <a href="https://www.youtube.com/@myiandiofficial" className="w-8 h-8 rounded-full bg-[#262626] hover:bg-orange-500 flex items-center justify-center transition-colors">
                     <Youtube size={16} />
                   </a>
                   <div className="relative" ref={emailRef}>
                     <button 
                       onClick={handleCopyEmail}
-                      className="w-8 h-8 rounded-full bg-[#262626] hover:bg-[#0062ff] flex items-center justify-center transition-colors"
+                      className="w-8 h-8 rounded-full bg-[#262626] hover:bg-orange-500 flex items-center justify-center transition-colors"
                       title="Click to copy email"
                     >
                       <Mail size={16} />
@@ -224,22 +222,22 @@ const Footer = () => {
           <div className="border-t border-b border-[#333] py-6 my-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
               <div className="flex flex-col items-center">
-                <Truck className="mb-2 text-[#0062ff]" size={24} />
+                <Truck className="mb-2 text-orange-500" size={24} />
                 <h5 className="text-sm font-medium">FREE SHIPPING</h5>
-                <p className="text-xs text-gray-400">On orders over $50</p>
+                <p className="text-xs text-gray-400">On orders over ₹3,000</p>
               </div>
               <div className="flex flex-col items-center">
-                <ShieldCheck className="mb-2 text-[#0062ff]" size={24} />
+                <ShieldCheck className="mb-2 text-orange-500" size={24} />
                 <h5 className="text-sm font-medium">SECURE PAYMENTS</h5>
                 <p className="text-xs text-gray-400">100% secure payment</p>
               </div>
               <div className="flex flex-col items-center">
-                <CreditCard className="mb-2 text-[#0062ff]" size={24} />
+                <CreditCard className="mb-2 text-orange-500" size={24} />
                 <h5 className="text-sm font-medium">PRICE MATCH</h5>
                 <p className="text-xs text-gray-400">Get the best price</p>
               </div>
               <div className="flex flex-col items-center">
-                <Clock className="mb-2 text-[#0062ff]" size={24} />
+                <Clock className="mb-2 text-orange-500" size={24} />
                 <h5 className="text-sm font-medium">SUPPORT 24/7</h5>
                 <p className="text-xs text-gray-400">Contact us anytime</p>
               </div>
@@ -248,6 +246,7 @@ const Footer = () => {
         </div>
       </div>
               
+
       {/* Copyright */}
       <div className="bg-[#121212] py-4">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
@@ -255,6 +254,9 @@ const Footer = () => {
             © {new Date().getFullYear()} Tech Store. All rights reserved.
           </p>
           <div className="flex items-center space-x-4">
+            <Link to="/shippings" className="text-xs text-gray-500 hover:text-white transition-colors">
+              Shipping Policy
+            </Link>
             <Link to="/terms" className="text-xs text-gray-500 hover:text-white transition-colors">
               Terms & Conditions
             </Link>
@@ -272,3 +274,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

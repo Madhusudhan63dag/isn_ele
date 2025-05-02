@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaTruck, FaBox, FaExchangeAlt, FaClock, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import productData from '../utils/data/product';
+import productData from '../../utils/data/page_data';
 
 const Shipping = () => {
   const location = useLocation();
@@ -11,11 +11,11 @@ const Shipping = () => {
   const [expandedFaqs, setExpandedFaqs] = useState({});
   const [activeTab, setActiveTab] = useState('shipping'); // shipping or returns
   
-  // Get data from product.js
-  const banners = productData.shippingBanner;
-  const shippingPolicy = productData.shippingPolicy;
-  const returnPolicy = productData.returnPolicy;
-  const shippingFaqs = productData.shippingFaqs;
+  // Get data from page_data.js
+  const banners = productData.shippingBanner || [];
+  const shippingPolicy = productData.shippingPolicy || '';
+  const returnPolicy = productData.returnPolicy || '';
+  const shippingFaqs = productData.shippingFaqs || [];
 
   // Scroll to top when component mounts
   useEffect(() => {

@@ -3,6 +3,8 @@ import Card from '../components/Card';
 import productData from '../utils/data/product';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaChevronLeft, FaChevronRight, FaStar, FaShoppingCart } from 'react-icons/fa';
+import banner1 from '../utils/image/banner/banner1.jpg';
+import banner2 from '../utils/image/banner/banner2.jpg';
 
 const Trending = () => {
   const navigate = useNavigate();
@@ -10,49 +12,67 @@ const Trending = () => {
   const queryParams = new URLSearchParams(location.search);
   const selectedCategoryParam = queryParams.get('category');
   const searchQuery = queryParams.get('search');
+  const [currentBanner, setCurrentBanner] = useState(0);
+  const [animationPhase, setAnimationPhase] = useState('idle');
+  const [prevBanner, setPrevBanner] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState(selectedCategoryParam || 'all');
+  const [sortOption, setSortOption] = useState('default');  
+  const trending = productData.trending;
+  const allProducts = productData.productData;
+  const trendingPageData = productData.trendingpage;
+  const categoryMappings = productData.categoryMappings;
+  const featuredProductsRef = useRef(null);
+  const [featuredPosition, setFeaturedPosition] = useState(0);
   
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname, location.search]);
   
-  const [currentBanner, setCurrentBanner] = useState(0);
-  const [animationPhase, setAnimationPhase] = useState('idle');
-  const [prevBanner, setPrevBanner] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState(selectedCategoryParam || 'all');
-  const [sortOption, setSortOption] = useState('default');
+  // More dynamic category matching using the category mappings
+  const getCategoryData = (categoryParam) => {
+    if (!categoryParam) return null;
+    
+    // Direct match
+    let categoryData = trendingPageData.find(item => 
+      item.title.toLowerCase().replace(/\s+/g, '-') === categoryParam
+    );
+    
+    // If no direct match, try to match using category mappings
+    if (!categoryData && categoryMappings[categoryParam]) {
+      const keywords = categoryMappings[categoryParam];
+      categoryData = trendingPageData.find(item => {
+        const title = item.title.toLowerCase();
+        return keywords.some(keyword => title.includes(keyword));
+      });
+    }
+    
+    return categoryData;
+  };
   
-  const trending = productData.trending;
-  const allProducts = productData.productData;
-  const trendingPageData = productData.trendingpage;
+  const selectedTrendingData = getCategoryData(selectedCategoryParam);
   
-  const selectedTrendingData = selectedCategoryParam 
-    ? trendingPageData.find(item => item.title.toLowerCase().replace(' ', '-') === selectedCategoryParam)
-    : null;
-  
+  // Rest of the component remains the same
   const banners = selectedTrendingData?.banner || [
     {
       id: 1,
-      imageUrl: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
+      imageUrl: banner1,
       heading: "Latest Tech Innovations",
       subheading: "Discover cutting-edge electronics that define the future"
     },
     {
       id: 2,
-      imageUrl: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
+      imageUrl: banner2,
       heading: "Best Selling Gadgets",
       subheading: "The electronic devices our customers can't get enough of"
     },
     {
       id: 3,
-      imageUrl: "https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
+      imageUrl: banner1,
       heading: "Smart Home Solutions",
       subheading: "Transform your living space with intelligent technology"
     }
   ];
 
-  const featuredProductsRef = useRef(null);
-  const [featuredPosition, setFeaturedPosition] = useState(0);
-  
   useEffect(() => {
     const interval = setInterval(() => {
       setAnimationPhase('recoil');
@@ -117,36 +137,6 @@ const Trending = () => {
       }, 200);
     }
   };
-  
-  const scrollLeftFeatured = () => {
-    if (featuredProductsRef.current) {
-      const containerWidth = featuredProductsRef.current.clientWidth;
-      const scrollAmount = containerWidth * 0.8;
-      featuredProductsRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-
-      setTimeout(() => {
-        const scrollPosition = featuredProductsRef.current.scrollLeft;
-        const maxScroll = featuredProductsRef.current.scrollWidth - featuredProductsRef.current.clientWidth;
-        const position = Math.round((scrollPosition / maxScroll) * (allProducts.length / 3 - 1));
-        setFeaturedPosition(position);
-      }, 300);
-    }
-  };
-
-  const scrollRightFeatured = () => {
-    if (featuredProductsRef.current) {
-      const containerWidth = featuredProductsRef.current.clientWidth;
-      const scrollAmount = containerWidth * 0.8;
-      featuredProductsRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-
-      setTimeout(() => {
-        const scrollPosition = featuredProductsRef.current.scrollLeft;
-        const maxScroll = featuredProductsRef.current.scrollWidth - featuredProductsRef.current.clientWidth;
-        const position = Math.round((scrollPosition / maxScroll) * (allProducts.length / 3 - 1));
-        setFeaturedPosition(position);
-      }, 300);
-    }
-  };
 
   const filteredProducts = useMemo(() => {
     let products = [];
@@ -156,34 +146,89 @@ const Trending = () => {
     } else if (selectedCategory === 'all') {
       products = allProducts;
     } else {
-      products = allProducts.filter(product => {
-        const productTitle = product.title.toLowerCase();
-        const productFeatures = product.features 
-          ? product.features.map(f => f.title.toLowerCase()).join(' ')
-          : '';
+      // Dynamic filtering based on category mappings
+      if (categoryMappings[selectedCategory]) {
+        const keywords = categoryMappings[selectedCategory];
+        products = allProducts.filter(product => {
+          // Check title
+          const title = product.title.toLowerCase();
+          if (keywords.some(keyword => title.includes(keyword))) {
+            return true;
+          }
           
-        return productTitle.includes(selectedCategory.toLowerCase()) ||
-               productFeatures.includes(selectedCategory.toLowerCase());
-      });
+          // Check features
+          if (product.features) {
+            const hasMatchingFeature = product.features.some(feature => {
+              if (feature.title) {
+                const featureTitle = feature.title.toLowerCase();
+                return keywords.some(keyword => featureTitle.includes(keyword));
+              }
+              return false;
+            });
+            if (hasMatchingFeature) return true;
+          }
+          
+          // Check description if exists
+          if (product.description) {
+            const description = product.description.toLowerCase();
+            return keywords.some(keyword => description.includes(keyword));
+          }
+          
+          return false;
+        });
+      } else {
+        // Default filtering logic for any other category
+        products = allProducts.filter(product => {
+          const productTitle = product.title.toLowerCase();
+          const productFeatures = product.features 
+            ? product.features.map(f => f.title.toLowerCase()).join(' ')
+            : '';
+            
+          return productTitle.includes(selectedCategory.toLowerCase()) ||
+                productFeatures.includes(selectedCategory.toLowerCase());
+        });
+      }
     }
     
+    // Search query filtering - Enhanced to check multiple product properties
     if (searchQuery) {
       const searchTerm = searchQuery.toLowerCase();
       return products.filter(product => {
+        // Check product title (most important)
         const title = product.title.toLowerCase();
-        const description = product.description ? product.description.toLowerCase() : '';
-        const features = product.features 
-          ? product.features.map(f => f.title.toLowerCase()).join(' ')
-          : '';
+        if (title.includes(searchTerm)) {
+          return true;
+        }
         
-        return title.includes(searchTerm) || 
-               description.includes(searchTerm) || 
-               features.includes(searchTerm);
+        // Check product description
+        const description = product.description ? product.description.toLowerCase() : '';
+        if (description.includes(searchTerm)) {
+          return true;
+        }
+        
+        // Check features
+        if (product.features) {
+          // Handle features as array of strings or array of objects
+          if (typeof product.features[0] === 'string') {
+            const featuresText = product.features.join(' ').toLowerCase();
+            if (featuresText.includes(searchTerm)) {
+              return true;
+            }
+          } else if (typeof product.features[0] === 'object') {
+            const hasMatchingFeature = product.features.some(feature => {
+              const featureTitle = feature.title ? feature.title.toLowerCase() : '';
+              return featureTitle.includes(searchTerm);
+            });
+            if (hasMatchingFeature) return true;
+          }
+        }
+        
+        return false;
       });
     }
     
     return products;
-  }, [selectedTrendingData, selectedCategory, allProducts, searchQuery]);
+  }, [selectedTrendingData, selectedCategory, allProducts, searchQuery, categoryMappings]);
 
   const sortedProducts = useMemo(() => {
     return [...filteredProducts].sort((a, b) => {
@@ -202,22 +247,32 @@ const Trending = () => {
     });
   }, [filteredProducts, sortOption]);
 
+  // Dynamic category buttons generation
   const categories = useMemo(() => {
-    const baseCategories = [
-      { id: 'all', name: 'All Products' },
-      ...trendingPageData.map(category => ({
-        id: category.title.toLowerCase().replace(' ', '-'),
-        name: category.title
-      })),
-      { id: 'joints', name: 'Joint Health' },
-      { id: 'slim', name: 'Weight Management' },
-      { id: 'psorigo', name: 'Skin Care' }
-    ];
+    // Start with "All Products"
+    const baseCategories = [{ id: 'all', name: 'All Products' }];
+    
+    // Add trending categories from trending data
+    // trending.forEach(category => {
+    //   baseCategories.push({
+    //     id: category.id,
+    //     name: category.name
+    //   });
+    // });
+    
+    // Add any category from trendingPageData that might not be in trending
+    trendingPageData.forEach(category => {
+      const categoryId = category.title.toLowerCase().replace(/\s+/g, '-');
+      if (!baseCategories.find(c => c.id === categoryId)) {
+        baseCategories.push({
+          id: categoryId,
+          name: category.title
+        });
+      }
+    });
 
-    return Array.from(
-      new Map(baseCategories.map(item => [item.id, item])).values()
-    );
-  }, [trendingPageData]);
+    return baseCategories;
+  }, [trending, trendingPageData]);
 
   const handleProductClick = (productId) => {
     navigate(`/product/${productId}`);
@@ -288,43 +343,7 @@ const Trending = () => {
         </div>
       </section>
 
-      {!selectedTrendingData && (
-        <section className="container mx-auto py-10 px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800">Featured Categories</h2>
-            <a href="/categories" className="text-blue-600 hover:text-blue-800 font-medium">View All</a>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {trending.map((card, index) => (
-              <div 
-                key={index} 
-                className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 p-4 text-center cursor-pointer"
-                onClick={() => navigate(`/trending?category=${card.id}`)}
-              >
-                <div className="w-20 h-20 mx-auto mb-3 bg-blue-50 rounded-full flex items-center justify-center">
-                  <img 
-                    src={card.imageUrl || `https://via.placeholder.com/80?text=${card.title.charAt(0)}`} 
-                    alt={card.title} 
-                    className="w-12 h-12 object-contain" 
-                  />
-                </div>
-                <h3 className="font-medium text-gray-800">{card.title}</h3>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
       <section className="container mx-auto py-10 px-4">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8">
-          {searchQuery 
-            ? `Search Results for "${searchQuery}"`
-            : selectedTrendingData 
-              ? `${selectedTrendingData.title}` 
-              : "Trending Electronics"
-          }
-        </h2>
-        
         <div className="flex flex-wrap justify-between items-center mb-6">
           <div className="mb-4 sm:mb-0">
             <p className="text-gray-600">
@@ -406,11 +425,11 @@ const Trending = () => {
               className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 flex flex-col" 
               onClick={() => handleProductClick(product.id)}
             >
-              <div className="relative h-48 bg-gray-100 p-4">
+              <div className="relative h-56 bg-gray-100 p-4">
                 <img 
                   src={product.imageUrl || product.url} 
                   alt={product.title} 
-                  className="w-full h-full object-contain transition-transform hover:scale-105"
+                  className="w-full h-full transition-transform hover:scale-105"
                 />
                 {product.discount && (
                   <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
@@ -423,7 +442,6 @@ const Trending = () => {
                   {[...Array(5)].map((_, i) => (
                     <FaStar key={i} className={`${i < (product.rating || 4) ? 'text-yellow-400' : 'text-gray-300'}`} size={14} />
                   ))}
-                  <span className="text-xs text-gray-500 ml-1">({product.reviews || '24'} reviews)</span>
                 </div>
                 <h3 className="font-medium text-gray-800 mb-1 line-clamp-2 flex-grow">{product.title}</h3>
                 <div className="flex flex-col">
@@ -443,22 +461,15 @@ const Trending = () => {
                     >
                       View Details
                     </button>
-                    <button 
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-800 p-2 rounded transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                    >
-                      <FaShoppingCart />
-                    </button>
                   </div>
                 </div>
               </div>
             </div>
           ))}
+
         </div>
         
-        {sortedProducts.length > 0 && (
+        {sortedProducts.length > 5 && (
           <div className="mt-12 text-center">
             <button className="bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium px-6 py-3 rounded-md transition duration-300">
               Load More Products

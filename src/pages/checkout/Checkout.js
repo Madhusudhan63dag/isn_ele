@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../../context/CartContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaShoppingCart, FaLock, FaShippingFast, FaCreditCard, FaArrowLeft, FaCheckCircle, FaShieldAlt, FaMedal, FaRegCreditCard, FaYoutube, FaEnvelope, FaBox, FaHeadset, FaPhone } from 'react-icons/fa';
-import SEO from '../components/SEO';
+import { FaShoppingCart, FaLock, FaShippingFast, FaCreditCard, FaArrowLeft, FaShieldAlt, FaMedal } from 'react-icons/fa';
+import SEO from '../../components/SEO';
 
 // Add backend API URL - Fixed to properly use environment variables or fallback
-const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000'); //https://razorpaybackend-wgbh.onrender.com
-// Add YouTube OAuth credentials - Updated to use OAuth 2.0 with proper Google Identity Services
-const YOUTUBE_CLIENT_ID = process.env.REACT_APP_YOUTUBE_CLIENT_ID || '672880894908-nlo53e5cevqpvc1r1j45s3h8mr8a7fdu.apps.googleusercontent.com';
-const YOUTUBE_CHANNEL_ID = 'UCZk0XVMUcmhAGf0L-V9rUxA'; // Your YouTube channel ID
-// Development verification code - should match backend DEV_VERIFICATION_CODE
-const DEV_VERIFICATION_CODE = 'devtest123';
+const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'https://razorpaybackend-wgbh.onrender.com'); //https://razorpaybackend-wgbh.onrender.com
 
 const Checkout = () => {
   const { cart, cartTotal, formatPrice, clearCart } = useCart();
@@ -38,7 +33,11 @@ const Checkout = () => {
   };
   
   const [formData, setFormData] = useState(getUserData);
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState('razorpay');
+  const [selectedPaymentSubType, setSelectedPaymentSubType] = useState('all'); // For UPI and EMI subtype selection
+  const [upiId, setUpiId] = useState(''); // For UPI ID input
+  const [selectedEmiOption, setSelectedEmiOption] = useState(null); // For EMI plan selection
+  const [showQrCode, setShowQrCode] = useState(false); // For showing/hiding QR code
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [errors, setErrors] = useState({});
@@ -57,12 +56,6 @@ const Checkout = () => {
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [orderReference, setOrderReference] = useState('');
   const [paymentId, setPaymentId] = useState('');
-
-  // Add states for YouTube subscription verification
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [verifyingSubscription, setVerifyingSubscription] = useState(false);
-  const [subscriptionError, setSubscriptionError] = useState('');
-  const [discountApplied, setDiscountApplied] = useState(false);
 
   // Redirect if no shipping information
   useEffect(() => {
@@ -96,44 +89,6 @@ const Checkout = () => {
       document.body.appendChild(script);
     });
   };
-
-  // Initialize using modern Google Identity Services
-  useEffect(() => {
-    console.log('Initializing Google Identity Services...');
-    
-    const loadGoogleIdentityServices = () => {
-      return new Promise((resolve, reject) => {
-        // Check if script is already loaded
-        if (document.getElementById('google-identity-script')) {
-          console.log('Google Identity script already loaded');
-          resolve(true);
-          return;
-        }
-        
-        // Load the Google Identity script
-        const script = document.createElement('script');
-        script.id = 'google-identity-script';
-        script.src = 'https://accounts.google.com/gsi/client';
-        script.async = true;
-        script.defer = true;
-        
-        script.onload = () => {
-          console.log('Google Identity Services script loaded successfully');
-          resolve(true);
-        };
-        
-        script.onerror = (error) => {
-          console.error('Error loading Google Identity Services script:', error);
-          reject(error);
-        };
-        
-        document.body.appendChild(script);
-      });
-    };
-    
-    loadGoogleIdentityServices()
-      .catch(error => console.error('Failed to load Google Identity Services:', error));
-  }, []);
 
   const handleCardDataChange = (e) => {
     const { name, value } = e.target;
@@ -175,102 +130,6 @@ const Checkout = () => {
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  // Handle YouTube authentication and subscription verification
-  const handleVerifyYoutubeSubscription = async () => {
-    setVerifyingSubscription(true);
-    setSubscriptionError('');
-    
-    try {
-      // Development mode for testing (remove in production)
-      const isDev = process.env.NODE_ENV === 'development';
-      if (isDev) {
-        console.log('Using development mode verification');
-        // Add dev mode bypass for testing
-        const response = await fetch(`${API_URL}/verify-youtube-subscription`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            devMode: true,
-            verificationCode: DEV_VERIFICATION_CODE,
-          }),
-        });
-        
-        const data = await response.json();
-        console.log('Development mode verification response:', data);
-        
-        if (data.success && data.isSubscribed) {
-          setIsSubscribed(true);
-          setDiscountApplied(true);
-          setVerifyingSubscription(false);
-          return;
-        }
-      }
-
-      // Regular flow for production using Google Identity Services
-      if (!window.google) {
-        console.error("Google Identity Services not loaded");
-        setSubscriptionError("Authentication service not available. Please try again later.");
-        setVerifyingSubscription(false);
-        return;
-      }
-      
-      // Use the new Google Identity OAuth2 flow
-      const client = window.google.accounts.oauth2.initTokenClient({
-        client_id: YOUTUBE_CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/youtube.readonly',
-        callback: async (tokenResponse) => {
-          if (tokenResponse.error) {
-            console.error('Google OAuth error:', tokenResponse);
-            setSubscriptionError('Authentication failed. Please try again.');
-            setVerifyingSubscription(false);
-            return;
-          }
-          
-          // Got the access token
-          const accessToken = tokenResponse.access_token;
-          
-          try {
-            // Call backend to verify subscription
-            const response = await fetch(`${API_URL}/verify-youtube-subscription`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                accessToken,
-                channelId: YOUTUBE_CHANNEL_ID,
-              }),
-            });
-            
-            const data = await response.json();
-            
-            if (data.success && data.isSubscribed) {
-              setIsSubscribed(true);
-              setDiscountApplied(true);
-            } else {
-              setSubscriptionError(data.message || 'Not subscribed to the channel. Subscribe to get a 10% discount!');
-            }
-          } catch (error) {
-            console.error('Error verifying subscription with backend:', error);
-            setSubscriptionError('Failed to verify subscription. Please try again.');
-          } finally {
-            setVerifyingSubscription(false);
-          }
-        },
-      });
-      
-      // Request the access token
-      client.requestAccessToken();
-      
-    } catch (error) {
-      console.error('Error in YouTube verification process:', error);
-      setSubscriptionError('Failed to verify subscription. Please try again.');
-      setVerifyingSubscription(false);
-    }
   };
 
   // Create Razorpay order
@@ -380,9 +239,7 @@ const Checkout = () => {
               cartItems: [...cart],
               cartTotal,
               orderTotal,
-              shippingCost,
-              discountAmount,
-              discountApplied
+              shippingCost
             };
             
             // Store in localStorage as fallback
@@ -457,8 +314,7 @@ const Checkout = () => {
         totalAmount: orderTotal,
         currency: '₹',
         paymentMethod: paymentMethod === 'razorpay' ? 'Razorpay' : (paymentMethod === 'card' ? 'Credit Card' : 'Cash on Delivery'),
-        paymentId: paymentId || 'COD',
-        discount: discountApplied ? '10% YouTube Subscriber Discount' : 'No discount applied'
+        paymentId: paymentId || 'COD'
       };
       
       const customerDetails = {
@@ -665,17 +521,89 @@ const Checkout = () => {
         // Continue with fallback behavior
       }
       
+      // Check for API connectivity for payment methods that need it
+      if ((paymentMethod === 'razorpay' || paymentMethod === 'upi' || paymentMethod === 'emi') && !isApiConnected) {
+        alert('Cannot connect to payment server. Please try another payment method or try again later.');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Check for EMI method without bank or plan selection
+      if (paymentMethod === 'emi' && (!selectedPaymentSubType || selectedPaymentSubType === 'all' || !selectedEmiOption)) {
+        alert('Please select your bank and EMI plan');
+        setIsSubmitting(false);
+        return;
+      }
+      
       if (paymentMethod === 'razorpay') {
-        if (!isApiConnected) {
-          alert('Cannot connect to payment server. Please try another payment method or try again later.');
-          setIsSubmitting(false);
-          return;
-        }
-        
         // Create Razorpay order and display payment form
         const orderData = await createRazorpayOrder();
         if (orderData) {
           await displayRazorpayPayment(orderData);
+        } else {
+          setIsSubmitting(false);
+        }
+      }
+      else if (paymentMethod === 'upi') {
+        // Create Razorpay order and display UPI payment form
+        const orderData = await createRazorpayOrder();
+        if (orderData) {
+          // Import the displayRazorpayPayment function from payment.js
+          try {
+            const { displayRazorpayPayment } = await import('./payment');
+            // Call it with UPI specific parameters
+            await displayRazorpayPayment(
+              orderData,
+              {...formData, upiId}, // Pass UPI ID if user entered it
+              cart,
+              cartTotal,
+              orderTotal,
+              shippingCost,
+              'upi',
+              setIsSubmitting,
+              setOrderComplete,
+              setPaymentProcessing,
+              clearCart,
+              sendOrderConfirmationEmail,
+              'upi'
+            );
+          } catch (error) {
+            console.error('Error loading Razorpay UPI:', error);
+            alert('Failed to initialize UPI payment. Please try again.');
+            setIsSubmitting(false);
+          }
+        } else {
+          setIsSubmitting(false);
+        }
+      }
+      else if (paymentMethod === 'emi') {
+        // Create Razorpay order and display EMI payment form
+        const orderData = await createRazorpayOrder();
+        if (orderData) {
+          // Import the displayRazorpayPayment function from payment.js
+          try {
+            const { displayRazorpayPayment } = await import('./payment');
+            // Call it with EMI specific parameters
+            await displayRazorpayPayment(
+              orderData,
+              formData,
+              cart,
+              cartTotal,
+              orderTotal,
+              shippingCost,
+              'emi',
+              setIsSubmitting,
+              setOrderComplete,
+              setPaymentProcessing,
+              clearCart,
+              sendOrderConfirmationEmail,
+              'emi'
+            );
+          } catch (error) {
+            console.error('Error loading Razorpay EMI:', error);
+            alert('Failed to initialize EMI payment. Please try again.');
+            setIsSubmitting(false);
+          }
         } else {
           setIsSubmitting(false);
         }
@@ -706,9 +634,7 @@ const Checkout = () => {
               cartItems: [...cart],
               cartTotal,
               orderTotal,
-              shippingCost,
-              discountAmount,
-              discountApplied
+              shippingCost
             }
           });
           
@@ -743,9 +669,7 @@ const Checkout = () => {
               cartItems: [...cart],
               cartTotal,
               orderTotal,
-              shippingCost,
-              discountAmount,
-              discountApplied
+              shippingCost
             }
           });
           
@@ -760,11 +684,8 @@ const Checkout = () => {
   // Calculate shipping cost and total
   const shippingCost = cartTotal > 3000 ? 0 : 99;
   
-  // Calculate discount if applied
-  const discountAmount = discountApplied ? (cartTotal * 0.1) : 0;
-  
-  // Update order total with discount
-  const orderTotal = cartTotal + shippingCost - discountAmount;
+  // Update order total
+  const orderTotal = cartTotal + shippingCost;
   
   // Calculate estimated delivery date (5-7 days from now)
   const getDeliveryDateRange = () => {
@@ -870,76 +791,6 @@ const Checkout = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Payment Form */}
           <div className="lg:w-2/3">
-            {/* YouTube Subscription Discount Section - NEW */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-l-4 border-red-600">
-              <div className="flex items-center mb-4">
-                <FaYoutube className="text-red-600 text-2xl mr-3" />
-                <h2 className="text-xl font-semibold">Get 10% Off with YouTube Subscription</h2>
-              </div>
-              
-              <p className="text-gray-700 mb-4">
-                Subscribe to our YouTube channel and get an instant 10% discount on your order!
-              </p>
-              
-              {discountApplied ? (
-                <div className="bg-green-50 border border-green-200 rounded-md p-4 flex items-start">
-                  <FaCheckCircle className="text-green-600 mt-0.5 mr-2 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-green-700">YouTube Subscription Verified!</p>
-                    <p className="text-sm text-green-600">10% discount has been applied to your order.</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Follow these steps to get your discount:
-                  </p>
-                  <ol className="list-decimal list-inside text-sm text-gray-600 space-y-2 ml-2">
-                    <li>Click the "Verify Subscription" button below</li>
-                    <li>Sign in with your Google account</li>
-                    <li>Make sure you're subscribed to our channel</li>
-                    <li>Your discount will be applied automatically</li>
-                  </ol>
-                  
-                  {subscriptionError && (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 text-sm text-yellow-800">
-                      {subscriptionError}
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center">
-                    <button
-                      onClick={handleVerifyYoutubeSubscription}
-                      disabled={verifyingSubscription}
-                      className="flex items-center bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors"
-                    >
-                      {verifyingSubscription ? (
-                        <>
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Verifying...
-                        </>
-                      ) : (
-                        <>
-                          <FaYoutube className="mr-2" /> Verify Subscription
-                        </>
-                      )}
-                    </button>
-                    <a 
-                      href={`https://www.youtube.com/channel/${YOUTUBE_CHANNEL_ID}?sub_confirmation=1`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-4 text-sm text-red-600 hover:text-red-800 hover:underline"
-                    >
-                      Go to our channel
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
-
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <h2 className="text-xl font-semibold mb-6">Payment Method</h2>
               <div className="space-y-4">
@@ -952,13 +803,49 @@ const Checkout = () => {
                       name="paymentMethod" 
                       value="razorpay" 
                       checked={paymentMethod === 'razorpay'} 
-                      onChange={() => setPaymentMethod('razorpay')}
+                      onChange={() => {
+                        setPaymentMethod('razorpay');
+                        setSelectedPaymentSubType('all');
+                      }}
                       className="h-4 w-4 text-green-600"
                     />
                     <span className="ml-2 flex items-center">
                       <img src="https://razorpay.com/favicon.png" alt="Razorpay" className="w-4 h-4 mr-2" />
-                      Pay with Razorpay (UPI, Cards, NetBanking, Wallets)
+                      Pay with Razorpay (Cards, NetBanking, Wallets)
                       <span className="ml-2 px-2 py-1 text-xs bg-green-600 text-white rounded-full">Recommended</span>
+                    </span>
+                  </label>
+
+                  {/* UPI Payment Option */}
+                  <label className="flex items-center p-4 border border-blue-200 bg-blue-50 rounded-md cursor-pointer hover:bg-blue-100">
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      value="upi" 
+                      checked={paymentMethod === 'upi'} 
+                      onChange={() => setPaymentMethod('upi')}
+                      className="h-4 w-4 text-blue-600"
+                    />
+                    <span className="ml-2 flex items-center">
+                      <img src="https://cdn.razorpay.com/static/assets/logo/upi.svg" alt="UPI" className="w-4 h-4 mr-2" />
+                      Pay via UPI (Google Pay, PhonePe, BHIM, Paytm)
+                    </span>
+                  </label>
+
+                  {/* EMI Payment Option */}
+                  <label className="flex items-center p-4 border border-purple-200 bg-purple-50 rounded-md cursor-pointer hover:bg-purple-100">
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      value="emi" 
+                      checked={paymentMethod === 'emi'} 
+                      onChange={() => setPaymentMethod('emi')}
+                      className="h-4 w-4 text-purple-600"
+                    />
+                    <span className="ml-2 flex items-center">
+                      <img src="https://cdn.razorpay.com/static/assets/logo/card.svg" alt="EMI" className="w-4 h-4 mr-2" />
+                      Pay in EMI (Credit Card EMI, No Cost EMI)
+                      {orderTotal >= 3000 && <span className="ml-2 px-2 py-1 text-xs bg-purple-600 text-white rounded-full">Available</span>}
                     </span>
                   </label>
                   
@@ -989,6 +876,284 @@ const Checkout = () => {
                       <img src="https://cdn.razorpay.com/static/assets/logo/netbanking.svg" alt="Netbanking" className="h-8" />
                       <img src="https://cdn.razorpay.com/static/assets/logo/card.svg" alt="Card" className="h-8" />
                       <img src="https://cdn.razorpay.com/static/assets/logo/wallet.svg" alt="Wallet" className="h-8" />
+                    </div>
+                  </div>
+                )}
+                
+                {/* Show UPI information */}
+                {paymentMethod === 'upi' && (
+                  <div className="mt-6 border-t pt-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
+                      <p className="text-sm text-blue-800">
+                        Pay directly via UPI. You can either scan the QR code or enter your UPI ID to make the payment.
+                      </p>
+                    </div>
+                    
+                    <div className="flex flex-col md:flex-row gap-6 mt-4">
+                      {/* UPI QR Code */}
+                      {/* <div className="flex flex-col items-center flex-1">
+                        <h3 className="font-medium mb-3">Scan QR Code</h3>
+                        <div className="border border-gray-300 rounded-md p-3 bg-white mb-3">
+                          <div className="w-48 h-48 mx-auto bg-white">
+                            {showQrCode ? (
+                              <img 
+                                src="https://cdn.razorpay.com/static/assets/merchant-badge/badge-dark.png" 
+                                alt="UPI QR Code" 
+                                className="w-full h-full object-contain"
+                              />
+                            ) : (
+                              <div className="flex flex-col items-center justify-center h-full">
+                                <button 
+                                  onClick={async () => {
+                                    setPaymentProcessing(true);
+                                    // Create Razorpay order first
+                                    const orderData = await createRazorpayOrder();
+                                    if (orderData) {
+                                      setShowQrCode(true);
+                                    }
+                                    setPaymentProcessing(false);
+                                  }}
+                                  className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                                  disabled={paymentProcessing}
+                                >
+                                  {paymentProcessing ? (
+                                    <div className="flex items-center">
+                                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                      </svg>
+                                      Generating QR...
+                                    </div>
+                                  ) : (
+                                    "Generate QR Code"
+                                  )}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {showQrCode && (
+                          <div className="text-center mt-2 text-sm">
+                            <p>Scan with any UPI app</p>
+                            <div className="flex justify-center mt-2 gap-3">
+                              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/512px-Google_Pay_Logo.svg.png" alt="Google Pay" className="h-6" />
+                              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/PhonePe_Logo.svg/1200px-PhonePe_Logo.svg.png" alt="PhonePe" className="h-6" />
+                              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Paytm_Logo_%28standalone%29.svg/2560px-Paytm_Logo_%28standalone%29.svg.png" alt="Paytm" className="h-6" />
+                              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/1200px-UPI-Logo-vector.svg.png" alt="BHIM UPI" className="h-6" />
+                            </div>
+                          </div>
+                        )}
+                      </div> */}
+                      
+                      {/* UPI ID Input */}
+                      <div className="flex-1 border-t md:border-t-0 md:border-l border-gray-200 md:pl-6 pt-6 md:pt-0">
+                        <h3 className="font-medium mb-3">Or Pay via UPI ID</h3>
+                        <div className="space-y-4">
+                          <div>
+                            <label htmlFor="upi-id" className="block text-sm font-medium text-gray-700 mb-1">
+                              Enter your UPI ID
+                            </label>
+                            <div className="mt-1 flex rounded-md shadow-sm">
+                              <input
+                                type="text"
+                                name="upi-id"
+                                id="upi-id"
+                                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="yourname@upi"
+                                value={upiId}
+                                onChange={(e) => setUpiId(e.target.value)}
+                              />
+                            </div>
+                            <p className="mt-1 text-xs text-gray-500">
+                              Format: username@bankname (example: johndoe@okaxis)
+                            </p>
+                          </div>
+                          
+                          <button 
+                            onClick={async () => {
+                              if (!upiId.includes('@')) {
+                                alert('Please enter a valid UPI ID');
+                                return;
+                              }
+                              
+                              setPaymentProcessing(true);
+                              // Create Razorpay order and open with UPI option
+                              const orderData = await createRazorpayOrder();
+                              if (orderData) {
+                                // Import the displayRazorpayPayment function from payment.js
+                                const { displayRazorpayPayment } = await import('./payment');
+                                // Call it with UPI specific parameters
+                                await displayRazorpayPayment(
+                                  orderData,
+                                  {...formData, upiId},
+                                  cart,
+                                  cartTotal,
+                                  orderTotal,
+                                  shippingCost,
+                                  'upi',
+                                  setIsSubmitting,
+                                  setOrderComplete,
+                                  setPaymentProcessing,
+                                  clearCart,
+                                  sendOrderConfirmationEmail,
+                                  'upi'
+                                );
+                              } else {
+                                setPaymentProcessing(false);
+                              }
+                            }}
+                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                            disabled={paymentProcessing || !upiId}
+                          >
+                            {paymentProcessing ? (
+                              <div className="flex items-center justify-center">
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Processing...
+                              </div>
+                            ) : (
+                              "Pay Now"
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Show EMI information */}
+                {paymentMethod === 'emi' && (
+                  <div className="mt-6 border-t pt-6">
+                    <div className="bg-purple-50 border border-purple-200 rounded-md p-4 mb-4">
+                      <p className="text-sm text-purple-800">
+                        Pay in easy monthly installments. Choose your preferred bank and EMI plan.
+                      </p>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <h3 className="font-medium mb-3">Select Your Bank</h3>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {['HDFC Bank', 'ICICI Bank', 'SBI', 'Axis Bank', 'Kotak Bank', 'AMEX'].map(bank => (
+                          <div 
+                            key={bank} 
+                            className={`border p-3 rounded-md text-center cursor-pointer transition-colors
+                              ${selectedPaymentSubType === bank.toLowerCase().replace(' ', '') ? 'bg-purple-100 border-purple-300' : 'hover:bg-gray-50'}`}
+                            onClick={() => setSelectedPaymentSubType(bank.toLowerCase().replace(' ', ''))}
+                          >
+                            <img 
+                              src={`https://cdn.razorpay.com/bank-logos/${bank.toLowerCase().replace(' ', '')}.svg`} 
+                              alt={bank} 
+                              className="h-8 w-auto mx-auto mb-2"
+                              onError={(e) => { e.target.onerror = null; e.target.src = 'https://cdn.razorpay.com/static/assets/logo/card.svg'; }}
+                            />
+                            <span className="text-sm font-medium">{bank}</span>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {selectedPaymentSubType && selectedPaymentSubType !== 'all' && (
+                        <div className="mt-6">
+                          <h3 className="font-medium mb-3">EMI Plans</h3>
+                          
+                          <div className="space-y-3">
+                            {[
+                              { months: 3, interest: orderTotal >= 5000 ? 'No Cost EMI' : '12%' },
+                              { months: 6, interest: orderTotal >= 7000 ? 'No Cost EMI' : '13%' },
+                              { months: 9, interest: orderTotal >= 10000 ? 'No Cost EMI' : '14%' },
+                              { months: 12, interest: '14%' }
+                            ].map((plan) => {
+                              // Calculate monthly amount
+                              const isNoCost = plan.interest === 'No Cost EMI';
+                              const interestRate = isNoCost ? 0 : parseInt(plan.interest, 10) / 100;
+                              const totalWithInterest = isNoCost ? orderTotal : (orderTotal * (1 + interestRate));
+                              const monthlyAmount = totalWithInterest / plan.months;
+                              
+                              return (
+                                <div 
+                                  key={plan.months}
+                                  className={`border p-4 rounded-md cursor-pointer transition-colors
+                                    ${selectedEmiOption === plan.months ? 'bg-purple-100 border-purple-300' : 'hover:bg-gray-50'}`}
+                                  onClick={() => setSelectedEmiOption(plan.months)}
+                                >
+                                  <div className="flex justify-between items-center">
+                                    <div>
+                                      <p className="font-medium">{plan.months} Month{plan.months > 1 ? 's' : ''}</p>
+                                      <p className="text-sm text-gray-600">
+                                        {isNoCost ? (
+                                          <span className="text-green-600">No Extra Cost</span>
+                                        ) : (
+                                          `Interest: ${plan.interest}`
+                                        )}
+                                      </p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="font-medium">₹{Math.ceil(monthlyAmount).toLocaleString()}/month</p>
+                                      <p className="text-sm text-gray-600">Total: ₹{Math.ceil(totalWithInterest).toLocaleString()}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          
+                          <button 
+                            onClick={async () => {
+                              if (!selectedEmiOption) {
+                                alert('Please select an EMI plan');
+                                return;
+                              }
+                              
+                              setPaymentProcessing(true);
+                              // Create Razorpay order and open with EMI option
+                              const orderData = await createRazorpayOrder();
+                              if (orderData) {
+                                // Import the displayRazorpayPayment function from payment.js
+                                const { displayRazorpayPayment } = await import('./payment');
+                                // Call it with EMI specific parameters
+                                await displayRazorpayPayment(
+                                  orderData,
+                                  formData,
+                                  cart,
+                                  cartTotal,
+                                  orderTotal,
+                                  shippingCost,
+                                  'emi',
+                                  setIsSubmitting,
+                                  setOrderComplete,
+                                  setPaymentProcessing,
+                                  clearCart,
+                                  sendOrderConfirmationEmail,
+                                  'emi'
+                                );
+                              } else {
+                                setPaymentProcessing(false);
+                              }
+                            }}
+                            className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors mt-6"
+                            disabled={paymentProcessing || !selectedEmiOption}
+                          >
+                            {paymentProcessing ? (
+                              <div className="flex items-center justify-center">
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Processing...
+                              </div>
+                            ) : (
+                              "Pay with EMI"
+                            )}
+                          </button>
+                        </div>
+                      )}
+                      
+                      {!selectedPaymentSubType && (
+                        <p className="text-center text-gray-500 mt-4">Please select a bank to view EMI options</p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1078,17 +1243,6 @@ const Checkout = () => {
                   <span className={shippingCost === 0 ? 'text-green-600 font-medium' : ''}>{shippingCost === 0 ? 'Free' : formatPrice(shippingCost)}</span>
                 </div>
                 
-                {/* Add discount row if applied */}
-                {discountApplied && (
-                  <div className="flex justify-between py-2 text-green-600">
-                    <span className="flex items-center">
-                      <FaYoutube className="mr-1" />
-                      YouTube Discount (10%)
-                    </span>
-                    <span className="font-medium">-{formatPrice(discountAmount)}</span>
-                  </div>
-                )}
-                
                 {/* Estimated tax row */}
                 <div className="flex justify-between py-2 text-gray-700">
                   <span className="flex items-center">
@@ -1116,8 +1270,13 @@ const Checkout = () => {
                       {paymentMethod === 'razorpay' && <img src="https://razorpay.com/favicon.png" alt="Razorpay" className="w-4 h-4 mr-1" />}
                       {paymentMethod === 'card' && <FaCreditCard className="mr-1" />}
                       {paymentMethod === 'cod' && <span className="mr-1">💵</span>}
+                      {paymentMethod === 'upi' && <img src="https://cdn.razorpay.com/static/assets/logo/upi.svg" alt="UPI" className="w-4 h-4 mr-1" />}
+                      {paymentMethod === 'emi' && <img src="https://cdn.razorpay.com/static/assets/logo/card.svg" alt="EMI" className="w-4 h-4 mr-1" />}
                       {paymentMethod === 'razorpay' ? 'Razorpay' : 
-                       paymentMethod === 'card' ? 'Credit Card' : 'Cash on Delivery'}
+                       paymentMethod === 'card' ? 'Credit Card' : 
+                       paymentMethod === 'cod' ? 'Cash on Delivery' :
+                       paymentMethod === 'upi' ? 'UPI' :
+                       'EMI'}
                     </span>
                   </div>
 
@@ -1131,14 +1290,6 @@ const Checkout = () => {
                   <div className="mt-2 text-sm text-green-600 bg-green-50 p-2 rounded-md flex items-center">
                     <FaShippingFast className="mr-2" />
                     <span>Free shipping on orders over ₹3,000!</span>
-                  </div>
-                )}
-                
-                {/* Add YouTube discount badge if applied */}
-                {discountApplied && (
-                  <div className="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded-md flex items-center">
-                    <FaYoutube className="mr-2" />
-                    <span>10% YouTube subscriber discount applied!</span>
                   </div>
                 )}
               </div>

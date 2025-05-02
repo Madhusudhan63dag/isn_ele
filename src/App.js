@@ -10,17 +10,17 @@ import Offer from './pages/Offer';
 import DealsPage from './pages/DealsPage';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import Faq from './pages/Faq';
-import Checkout from './pages/Checkout';
+import Faq from './pages/policy_other/Faq';
+import Checkout from './pages/checkout/Checkout';
 import ThankYou from './pages/ThankYou';
 
 // Import components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Trendpage from './pages/Trendpage';
-import Shipping from './pages/Shipping';
-import Privacy from './pages/Privacy';
-import Terms from './pages/Terms';
+import Shipping from './pages/policy_other/Shipping';
+import Privacy from './pages/policy_other/Privacy';
+import Terms from './pages/policy_other/Terms';
+import Sitemap from './pages/policy_other/Sitemap';
 import Auth from './components/Auth';
 
 // Import Cart Context
@@ -37,7 +37,6 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/trending" element={<Trending />} />
-                <Route path="/trendproduct" element={<Trendpage />} />
                 <Route path="/product/:id" element={<ProductPage />} />
                 <Route path="/offers" element={<Offer />} />
                 <Route path="/deals/:dealType" element={<DealsPage />} />
@@ -47,8 +46,11 @@ function App() {
                 <Route path="/shipping" element={<Auth />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
+                <Route path="/shippings" element={<Shipping />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/thank-you" element={<ThankYou />} />
+                <Route path="/sitemap" element={<Sitemap />} />
+
                 {/* Add other routes as needed */}
               </Routes>
             </main>

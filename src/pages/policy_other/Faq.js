@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaSearch, FaChevronDown, FaChevronUp, FaTruck, FaBox, FaExchangeAlt, FaCreditCard } from 'react-icons/fa';
-import productData from '../utils/data/product';
-import SEO from '../components/SEO';
+import productData from '../../utils/data/page_data';
+import SEO from '../../components/SEO';
 
 const Faq = () => {
   const location = useLocation();
@@ -13,11 +13,14 @@ const Faq = () => {
   const [expandedQuestions, setExpandedQuestions] = useState({});
   const [activeCategory, setActiveCategory] = useState(null);
   const [filteredFaqs, setFilteredFaqs] = useState([]);
+  const [searchResults, setSearchResults] = useState({ count: 0, categories: 0 });
+  const [isSearching, setIsSearching] = useState(false);
   const categoryRefs = useRef([]);
+  const searchInputRef = useRef(null);
   
   // Get banners from product data
-  const banners = productData.faqBanner;
-  const faqData = productData.faqData;
+  const banners = productData.faqBanner || [];
+  const faqData = productData.faqData || [];
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -97,33 +100,58 @@ const Faq = () => {
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
+    setIsSearching(!!term.trim());
     
     if (!term.trim()) {
       setFilteredFaqs(faqData);
+      setSearchResults({ count: 0, categories: 0 });
       return;
     }
     
-    // Filter FAQs based on search term
-    const filtered = faqData.map(category => {
-      return {
-        ...category,
-        questions: category.questions.filter(
-          q => q.question.toLowerCase().includes(term) || 
-               q.answer.toLowerCase().includes(term)
-        )
-      };
-    }).filter(category => category.questions.length > 0);
-    
-    setFilteredFaqs(filtered);
-    
-    // Expand all matching questions
-    const newExpandedState = {};
-    filtered.forEach(category => {
-      category.questions.forEach(question => {
-        newExpandedState[question.id] = true;
+    // Debounce search for better performance
+    const debounceTimer = setTimeout(() => {
+      // Filter FAQs based on search term
+      const filtered = faqData.map(category => {
+        return {
+          ...category,
+          questions: category.questions.filter(
+            q => q.question.toLowerCase().includes(term) || 
+                q.answer.toLowerCase().includes(term)
+          )
+        };
+      }).filter(category => category.questions.length > 0);
+      
+      // Calculate search metrics
+      const totalQuestions = filtered.reduce((total, category) => 
+        total + category.questions.length, 0);
+      
+      setFilteredFaqs(filtered);
+      setSearchResults({
+        count: totalQuestions,
+        categories: filtered.length
       });
-    });
-    setExpandedQuestions(newExpandedState);
+      
+      // Expand all matching questions for better UX
+      const newExpandedState = {};
+      filtered.forEach(category => {
+        category.questions.forEach(question => {
+          newExpandedState[question.id] = true;
+        });
+      });
+      setExpandedQuestions(newExpandedState);
+    }, 300);
+    
+    return () => clearTimeout(debounceTimer);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+    setFilteredFaqs(faqData);
+    setSearchResults({ count: 0, categories: 0 });
+    setIsSearching(false);
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
   };
 
   const toggleQuestion = (id) => {
@@ -210,13 +238,29 @@ const Faq = () => {
           <h2 className="text-3xl font-bold text-center mb-8">How can we help you?</h2>
           <div className="max-w-2xl mx-auto relative">
             <input
+              ref={searchInputRef}
               type="text"
               placeholder="Search for questions or topics..."
               value={searchTerm}
               onChange={handleSearch}
               className="w-full py-3 px-5 pl-12 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              aria-label="Search FAQs"
             />
             <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            {searchTerm && (
+              <button 
+                onClick={clearSearch}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+            {isSearching && (
+              <div className="mt-2 text-sm text-gray-600">
+                Found {searchResults.count} results in {searchResults.categories} categories
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -255,12 +299,18 @@ const Faq = () => {
 
             {/* Questions */}
             <div className="md:w-3/4">
-              {filteredFaqs.length === 0 ? (
+              {isSearching && filteredFaqs.length === 0 ? (
                 <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                  <h3 className="text-xl font-medium mb-2">No results found</h3>
+                  <h3 className="text-xl font-medium mb-2">No results found for "{searchTerm}"</h3>
                   <p className="text-gray-600">
-                    We couldn't find any FAQ matching your search. Please try different keywords or browse categories.
+                    We couldn't find any FAQs matching your search. Please try different keywords or browse categories.
                   </p>
+                  <button 
+                    onClick={clearSearch}
+                    className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    Clear Search
+                  </button>
                 </div>
               ) : (
                 filteredFaqs.map((category, categoryIndex) => (
@@ -280,13 +330,22 @@ const Faq = () => {
                       {category.questions.map((faq, index) => (
                         <div 
                           key={faq.id} 
-                          className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+                          className={`bg-white rounded-lg shadow-sm border ${
+                            isSearching && (
+                              faq.question.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
+                            ) ? 'border-blue-300 ring-2 ring-blue-100' : 'border-gray-200'
+                          } overflow-hidden`}
                         >
                           <button
                             className="w-full text-left p-4 flex justify-between items-center"
                             onClick={() => toggleQuestion(faq.id)}
+                            aria-expanded={expandedQuestions[faq.id]}
+                            aria-controls={`faq-answer-${faq.id}`}
                           >
-                            <h4 className="font-medium text-lg">{faq.question}</h4>
+                            <h4 className="font-medium text-lg">
+                              {isSearching ? highlightSearchTerm(faq.question, searchTerm) : faq.question}
+                            </h4>
                             <span>
                               {expandedQuestions[faq.id] ? 
                                 <FaChevronUp className="text-gray-500" /> : 
@@ -296,8 +355,13 @@ const Faq = () => {
                           </button>
                           
                           {expandedQuestions[faq.id] && (
-                            <div className="p-4 pt-0 bg-gray-50 border-t border-gray-200">
-                              <p className="text-gray-700">{faq.answer}</p>
+                            <div 
+                              id={`faq-answer-${faq.id}`}
+                              className="p-4 pt-0 bg-gray-50 border-t border-gray-200"
+                            >
+                              <p className="text-gray-700">
+                                {isSearching ? highlightSearchTerm(faq.answer, searchTerm) : faq.answer}
+                              </p>
                             </div>
                           )}
                         </div>
@@ -335,6 +399,22 @@ const Faq = () => {
         </div>
       </section>
     </div>
+  );
+};
+
+// Helper function to highlight search terms
+const highlightSearchTerm = (text, searchTerm) => {
+  if (!searchTerm.trim()) return text;
+  
+  const parts = text.split(new RegExp(`(${searchTerm})`, 'gi'));
+  return (
+    <>
+      {parts.map((part, index) => 
+        part.toLowerCase() === searchTerm.toLowerCase() ? 
+          <mark key={index} className="bg-yellow-200 px-1 rounded-sm">{part}</mark> : 
+          part
+      )}
+    </>
   );
 };
 

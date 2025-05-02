@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaLeaf, FaHeart, FaShieldAlt, FaCheck, FaMedal, FaCertificate } from 'react-icons/fa';
-import productData from '../utils/data/product';
+import bannerData from '../utils/data/banner';
 import SEO from '../components/SEO';
 
 const About = () => {
@@ -10,8 +10,8 @@ const About = () => {
   const [animationPhase, setAnimationPhase] = useState('idle');
   const [prevBanner, setPrevBanner] = useState(0);
   
-  // Get banners from product data
-  const banners = productData.aboutBanner;
+  // Get banners from banner data
+  const banners = bannerData.aboutBanners;
   
   // Scroll to top when component mounts
   useEffect(() => {

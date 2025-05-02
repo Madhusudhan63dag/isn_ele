@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaClock, FaFacebook, FaTwitter, FaInstagram, FaYoutube } from 'react-icons/fa';
-import productData from '../utils/data/product';
+import productData from '../utils/data/page_data';
 import SEO from '../components/SEO';
 
 const Contact = () => {
@@ -19,19 +19,24 @@ const Contact = () => {
   const [animationPhase, setAnimationPhase] = useState('idle');
   const [prevBanner, setPrevBanner] = useState(0);
   
-  // Get data from product.js
-  const banners = productData.contactBanner;
-  const contactInfo = productData.contactInfo;
-  const productSupport = productData.productSupport;
-  const contactFaqs = productData.contactFaqs;
+  // Get data from product.js with default values to prevent errors
+  const banners = productData?.contactBanner || [];
+  const contactInfo = productData?.contactInfo || {
+    location: { color: 'blue' },
+    phone: { color: 'green' },
+    email: { color: 'red' },
+    hours: { color: 'yellow' }
+  };
+  const productSupport = productData?.productSupport || [];
+  const contactFaqs = productData?.contactFaqs || [];
 
   // Get the icon component based on icon name
   const getIconComponent = (iconName) => {
     switch(iconName) {
-      case 'MapMarkerAlt': return <FaMapMarkerAlt className={`text-${contactInfo.location.color}-600 text-2xl`} />;
-      case 'PhoneAlt': return <FaPhoneAlt className={`text-${contactInfo.phone.color}-600 text-2xl`} />;
-      case 'Envelope': return <FaEnvelope className={`text-${contactInfo.email.color}-600 text-2xl`} />;
-      case 'Clock': return <FaClock className={`text-${contactInfo.hours.color}-600 text-2xl`} />;
+      case 'MapMarkerAlt': return <FaMapMarkerAlt className={`text-${contactInfo.location?.color || 'blue'}-600 text-2xl`} />;
+      case 'PhoneAlt': return <FaPhoneAlt className={`text-${contactInfo.phone?.color || 'green'}-600 text-2xl`} />;
+      case 'Envelope': return <FaEnvelope className={`text-${contactInfo.email?.color || 'red'}-600 text-2xl`} />;
+      case 'Clock': return <FaClock className={`text-${contactInfo.hours?.color || 'yellow'}-600 text-2xl`} />;
       default: return null;
     }
   };
@@ -43,7 +48,7 @@ const Contact = () => {
 
   // Banner animation effects
   useEffect(() => {
-    if (banners.length <= 1) return;
+    if (!banners || banners.length <= 1) return;
     
     const interval = setInterval(() => {
       setAnimationPhase('recoil');
@@ -57,7 +62,7 @@ const Contact = () => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [banners.length, currentBanner]);
+  }, [banners, currentBanner]);
 
   useEffect(() => {
     if (animationPhase === 'slide' && currentBanner !== prevBanner) {
@@ -144,14 +149,16 @@ const Contact = () => {
 
   // Render contact info item
   const renderContactItem = (item) => {
+    if (!item) return null;
+    
     return (
       <div className="bg-white p-6 rounded-lg shadow-md text-center">
-        <div className={`bg-${item.color}-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4`}>
+        <div className={`bg-${item.color || 'gray'}-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4`}>
           {getIconComponent(item.icon)}
         </div>
-        <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+        <h3 className="font-bold text-lg mb-2">{item.title || 'Information'}</h3>
         <p className="text-gray-600">
-          {item.details.map((detail, idx) => (
+          {item.details && item.details.map((detail, idx) => (
             <React.Fragment key={idx}>
               {typeof detail === 'string' ? (
                 <>{detail}<br /></>
@@ -178,59 +185,61 @@ const Contact = () => {
       <SEO 
         title="Contact Us - GlowGlaz"
         description="Get in touch with the GlowGlaz team for questions about our Ayurvedic products, orders, or customer support. Find our contact details, hours, and location information."
-        canonical="https://glowglaz.com/contact"
+        canonical="https://myiandi.com/contact"
       />
       
       {/* Banner Section */}
-      <section className="relative overflow-hidden">
-        <div
-          className={`flex transition-transform ${
-            animationPhase === 'recoil'
-              ? 'duration-200'
-              : ['bounce1', 'bounce2', 'bounce3', 'bounce4'].includes(animationPhase)
-              ? 'duration-150'
-              : 'duration-500'
-          } ease-in-out`}
-          style={{ transform: getSliderTransform() }}
-        >
-          {banners.map((banner, index) => (
-            <div key={banner.id} className="w-full flex-shrink-0">
-              <div
-                className="relative w-full h-[300px] bg-cover bg-center flex items-center justify-center"
-                style={{ backgroundImage: `url(${banner.imageUrl})` }}
-              >
+      {/* {banners && banners.length > 0 && (
+        <section className="relative overflow-hidden">
+          <div
+            className={`flex transition-transform ${
+              animationPhase === 'recoil'
+                ? 'duration-200'
+                : ['bounce1', 'bounce2', 'bounce3', 'bounce4'].includes(animationPhase)
+                ? 'duration-150'
+                : 'duration-500'
+            } ease-in-out`}
+            style={{ transform: getSliderTransform() }}
+          >
+            {banners.map((banner, index) => (
+              <div key={banner?.id || index} className="w-full flex-shrink-0">
+                <div
+                  className="relative w-full h-[300px] bg-cover bg-center flex items-center justify-center"
+                  style={{ backgroundImage: `url(${banner?.imageUrl || ''})` }}
+                >
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-        
-        {banners.length > 1 && (
-          <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex space-x-2">
-            {banners.map((_, index) => (
-              <button
-                key={index}
-                className={`w-3 h-3 rounded-full ${
-                  currentBanner === index ? 'bg-white' : 'bg-gray-400'
-                }`}
-                onClick={() => goToBanner(index)}
-                aria-label={`Go to slide ${index + 1}`}
-              />
             ))}
           </div>
-        )}
-      </section>
+          
+          {banners.length > 1 && (
+            <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex space-x-2">
+              {banners.map((_, index) => (
+                <button
+                  key={index}
+                  className={`w-3 h-3 rounded-full ${
+                    currentBanner === index ? 'bg-white' : 'bg-gray-400'
+                  }`}
+                  onClick={() => goToBanner(index)}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      )} */}
 
       {/* Contact Info Section */}
-      <section className="py-16">
+      {/* <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {renderContactItem(contactInfo.location)}
-            {renderContactItem(contactInfo.phone)}
-            {renderContactItem(contactInfo.email)}
-            {renderContactItem(contactInfo.hours)}
+            {contactInfo && contactInfo.location && renderContactItem(contactInfo.location)}
+            {contactInfo && contactInfo.phone && renderContactItem(contactInfo.phone)}
+            {contactInfo && contactInfo.email && renderContactItem(contactInfo.email)}
+            {contactInfo && contactInfo.hours && renderContactItem(contactInfo.hours)}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Contact Form Section */}
       <section className="py-12 bg-gray-50">
@@ -335,31 +344,35 @@ const Contact = () => {
       </section>
 
       {/* Product Support Categories */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Product Support</h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {productSupport.map((support, index) => (
-              <div 
-                key={index} 
-                className={`bg-gradient-to-b from-${support.color}-50 to-${support.color}-100 p-6 rounded-lg border border-${support.color}-200 text-center`}
-              >
-                <h3 className={`font-bold text-xl mb-4 text-${support.color}-800`}>{support.title}</h3>
-                <p className="text-gray-700 mb-6">
-                  {support.description}
-                </p>
-                <a 
-                  href={`mailto:${support.email}`} 
-                  className={`bg-${support.color}-600 hover:bg-${support.color}-700 text-white px-6 py-2 rounded-md font-medium inline-block`}
+      {/* {productSupport && productSupport.length > 0 && (
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-12">Product Support</h2>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {productSupport.map((support, index) => (
+                <div 
+                  key={index} 
+                  className={`bg-gradient-to-b from-${support?.color || 'blue'}-50 to-${support?.color || 'blue'}-100 p-6 rounded-lg border border-${support?.color || 'blue'}-200 text-center`}
                 >
-                  Get Support
-                </a>
-              </div>
-            ))}
+                  <h3 className={`font-bold text-xl mb-4 text-${support?.color || 'blue'}-800`}>{support?.title || 'Support'}</h3>
+                  <p className="text-gray-700 mb-6">
+                    {support?.description || ''}
+                  </p>
+                  {support?.email && (
+                    <a 
+                      href={`mailto:${support.email}`} 
+                      className={`bg-${support?.color || 'blue'}-600 hover:bg-${support?.color || 'blue'}-700 text-white px-6 py-2 rounded-md font-medium inline-block`}
+                    >
+                      Get Support
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )} */}
 
       {/* Map Section */}
       <section className="py-12 bg-gray-100">
@@ -367,34 +380,37 @@ const Contact = () => {
           <h2 className="text-3xl font-bold text-center mb-8">Our Location</h2>
           <div className="bg-white rounded-lg shadow-md p-4">
             <div className="aspect-video w-full">
-              {/* Replace with an actual Google Maps embed */}
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <div className="text-gray-500 text-center">
-                  <FaMapMarkerAlt className="text-4xl mx-auto mb-2" />
-                  <p className="font-medium">Interactive Map</p>
-                  <p className="text-sm">(Google Maps will appear here)</p>
-                </div>
-              </div>
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d28943.614735315532!2d78.465638!3d17.446136!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb91cd07585bcd%3A0xb10cf49e7038d870!2sISRAELITES%20SHOPPING%20NETWORK%20PVT%20LTD!5e1!3m2!1sen!2sin!4v1727708685071!5m2!1sen!2sin"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
             </div>
           </div>
         </div>
       </section>
 
       {/* FAQs */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
-          
-          <div className="max-w-3xl mx-auto space-y-6">
-            {contactFaqs.map((faq, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="font-bold text-lg mb-2">{faq.question}</h3>
-                <p className="text-gray-700">{faq.answer}</p>
-              </div>
-            ))}
+      {contactFaqs && contactFaqs.length > 0 && (
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+            
+            <div className="max-w-3xl mx-auto space-y-6">
+              {contactFaqs.map((faq, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="font-bold text-lg mb-2">{faq?.question || ''}</h3>
+                  <p className="text-gray-700">{faq?.answer || ''}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Connect With Us */}
       <section className="py-12 bg-gradient-to-r from-green-600 to-blue-500 text-white">

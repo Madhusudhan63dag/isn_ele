@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaFileContract, FaGavel, FaBalanceScale, FaClipboard, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import SEO from '../components/SEO';
-import productData from '../utils/data/product';
+import SEO from '../../components/SEO';
+import productData from '../../utils/data/page_data';
 
 const Terms = () => {
   const location = useLocation();
@@ -13,8 +13,8 @@ const Terms = () => {
   const [expandedSections, setExpandedSections] = useState({});
 
   // Get data from product.js
-  const banners = productData.termsBanner;
-  const termsData = productData.termsAndConditions;
+  const banners = productData.termsBanner || [];
+  const termsData = productData.termsAndConditions || [];
 
   // Scroll to top when component mounts
   useEffect(() => {

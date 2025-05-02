@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { FaHeart, FaFacebookF, FaTwitter, FaPinterestP, FaGoogle } from 'react-icons/fa';
+import { FaHeart, FaFacebookF, FaTwitter, FaPinterestP, FaGoogle, FaInstagram } from 'react-icons/fa';
 import { Star, ShoppingCart, Truck, Shield, ArrowLeft, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import productData from '../utils/data/product';
 import { useCart } from '../context/CartContext';
@@ -25,6 +25,11 @@ const ProductPage = () => {
       (p) => p.id === parseInt(id)
     );
     setProduct(foundProduct);
+    
+    // Set default active tab if there are tabs defined for this product
+    if (foundProduct?.tabs?.length > 0) {
+      setActiveTab(foundProduct.tabs[0].id);
+    }
   }, [id]);
 
   const incrementQuantity = () => {
@@ -48,6 +53,11 @@ const ProductPage = () => {
     }
   };
 
+  // Function to safely render HTML content from product tabs
+  const renderTabContent = (content) => {
+    return { __html: content };
+  };
+
   if (!product) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -55,6 +65,49 @@ const ProductPage = () => {
       </div>
     );
   }
+
+  // Extract tabs from product if available, or use a fallback for backward compatibility
+  const productTabs = product.tabs || [
+    {
+      id: 'description',
+      label: 'Description',
+      content: `<div class="grid md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="font-bold text-lg mb-3 text-gray-800">WHY YOU'LL LOVE IT</h3>
+          <div class="text-gray-700 space-y-4">
+            <p>${product.whyLoveIt}</p>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-bold text-lg mb-3 text-gray-800">FEATURES</h3>
+          <div class="text-gray-700">
+            <ul class="list-disc pl-5 space-y-2">
+              ${product.features.map(feature => `<li>${feature}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      </div>`
+    },
+    {
+      id: 'specs',
+      label: 'Specifications',
+      content: `<div class="grid md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="font-bold text-lg mb-3 text-gray-800">TECHNICAL SPECIFICATIONS</h3>
+          <div class="text-gray-700">
+            <p>Product technical specifications</p>
+          </div>
+        </div>
+      </div>`
+    },
+    {
+      id: 'reviews',
+      label: 'Reviews',
+      content: `<div>
+        <p>Product reviews content</p>
+      </div>`
+    }
+  ];
 
   return (
     <>
@@ -75,7 +128,7 @@ const ProductPage = () => {
             <div className="flex text-sm text-gray-500">
               <a href="/" className="hover:text-[#0062ff]">Home</a>
               <span className="mx-2">/</span>
-              <a href="/products" className="hover:text-[#0062ff]">Products</a>
+              <a href="/trending?category=all" className="hover:text-[#0062ff]">Products</a>
               <span className="mx-2">/</span>
               <span className="text-gray-800 font-medium">{product.title}</span>
             </div>
@@ -147,28 +200,16 @@ const ProductPage = () => {
                 
                 {/* Reviews Preview */}
                 <div className="flex items-center mb-4">
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
+                  <div className="flex">{
+                    [1, 2, 3, 4, 5].map((star) => (
                       <Star 
-                        key={star}
-                        size={16}
-                        className={star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+                      key={star}
+                      size={16}
+                      className={star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
                       />
-                    ))}
+                    ))
+                    }
                   </div>
-                  <span className="text-sm text-gray-500 ml-2">4.0 (24 reviews)</span>
-                  <button 
-                    className="text-sm text-[#0062ff] ml-4 hover:underline"
-                    onClick={() => {
-                      setActiveTab('reviews');
-                      setShowReviews(true);
-                      setTimeout(() => {
-                        document.getElementById('product-reviews').scrollIntoView({ behavior: 'smooth' });
-                      }, 100);
-                    }}
-                  >
-                    Write a review
-                  </button>
                 </div>
                 
                 {/* Price */}
@@ -226,13 +267,6 @@ const ProductPage = () => {
                       <ShoppingCart size={18} />
                       {product.inStock ? 'Add to Cart' : 'Out of Stock'}
                     </button>
-                    
-                    <button 
-                      className="w-12 h-12 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                      title="Add to Wishlist"
-                    >
-                      <FaHeart className="text-gray-500 hover:text-red-500" />
-                    </button>
                   </div>
                 </div>
                 
@@ -242,7 +276,7 @@ const ProductPage = () => {
                     <Truck size={20} className="text-[#0062ff]" />
                     <div>
                       <p className="font-medium text-sm">Free Shipping</p>
-                      <p className="text-xs text-gray-500">On orders over $50</p>
+                      <p className="text-xs text-gray-500">On orders over ₹50</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-md">
@@ -258,18 +292,21 @@ const ProductPage = () => {
                 <div className="border-t border-gray-200 pt-6">
                   <div className="flex items-center space-x-4">
                     <span className="text-gray-700 font-medium">Share:</span>
-                    <button className="w-8 h-8 rounded-full bg-[#f0f2f5] hover:bg-[#0062ff] hover:text-white flex items-center justify-center transition-colors">
+                    <a href="https://www.facebook.com/people/Iandicompany-Ele/pfbid06gGxGPRZef5P714qioE5TPMWWxuCa9W9ehMsUXcUsmMLZdKAKhA8MXSvKF22nJvDl/">
+                    <button  className="w-8 h-8 rounded-full bg-[#f0f2f5] hover:bg-[#0062ff] hover:text-white flex items-center justify-center transition-colors">
                       <FaFacebookF />
                     </button>
+                    </a>
+                    <a href="https://x.com/myiandiofficial">
                     <button className="w-8 h-8 rounded-full bg-[#f0f2f5] hover:bg-[#1DA1F2] hover:text-white flex items-center justify-center transition-colors">
                       <FaTwitter />
                     </button>
+                    </a>
+                    <a href='https://www.instagram.com/myiandiofficial'>
                     <button className="w-8 h-8 rounded-full bg-[#f0f2f5] hover:bg-[#E60023] hover:text-white flex items-center justify-center transition-colors">
-                      <FaPinterestP />
+                      <FaInstagram />
                     </button>
-                    <button className="w-8 h-8 rounded-full bg-[#f0f2f5] hover:bg-[#DB4437] hover:text-white flex items-center justify-center transition-colors">
-                      <FaGoogle />
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -277,302 +314,39 @@ const ProductPage = () => {
           </div>
         </div>
         
-        {/* Product Tabs Section */}
+        {/* Product Tabs Section - UPDATED to use dynamic data */}
         <div className="container mx-auto px-4 mt-8">
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
             {/* Tabs Navigation */}
-            <div className="flex border-b border-gray-200">
-              <button 
-                className={`py-4 px-6 text-sm font-medium ${activeTab === 'description' ? 'text-[#0062ff] border-b-2 border-[#0062ff]' : 'text-gray-600 hover:text-gray-800'}`}
-                onClick={() => setActiveTab('description')}
-              >
-                Description
-              </button>
-              <button 
-                className={`py-4 px-6 text-sm font-medium ${activeTab === 'specs' ? 'text-[#0062ff] border-b-2 border-[#0062ff]' : 'text-gray-600 hover:text-gray-800'}`}
-                onClick={() => setActiveTab('specs')}
-              >
-                Specifications
-              </button>
-              <button 
-                className={`py-4 px-6 text-sm font-medium ${activeTab === 'reviews' ? 'text-[#0062ff] border-b-2 border-[#0062ff]' : 'text-gray-600 hover:text-gray-800'}`}
-                onClick={() => setActiveTab('reviews')}
-                id="product-reviews"
-              >
-                Reviews (24)
-              </button>
+            <div className="flex border-b border-gray-200 overflow-x-auto">
+              {productTabs.map((tab) => (
+                <button 
+                  key={tab.id}
+                  className={`py-4 px-6 text-sm font-medium whitespace-nowrap ${
+                    activeTab === tab.id 
+                      ? 'text-[#0062ff] border-b-2 border-[#0062ff]' 
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                  onClick={() => setActiveTab(tab.id)}
+                  id={`tab-${tab.id}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
             
             {/* Tab Content */}
             <div className="p-6">
-              {/* Description Tab */}
-              {activeTab === 'description' && (
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <h3 className="font-bold text-lg mb-3 text-gray-800">WHY YOU'LL LOVE IT</h3>
-                    <div className="text-gray-700 space-y-4">
-                      <p>{product.whyLoveIt}</p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-bold text-lg mb-3 text-gray-800">FEATURES</h3>
-                    <div className="text-gray-700 space-y-4">
-                      <p>{product.ingredients}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* Specifications Tab */}
-              {activeTab === 'specs' && (
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <h3 className="font-bold text-lg mb-3 text-gray-800">TECHNICAL SPECIFICATIONS</h3>
-                    <div className="border-t border-gray-200">
-                      <div className="grid grid-cols-2 py-3 border-b border-gray-200">
-                        <div className="font-medium text-gray-600">Model</div>
-                        <div className="text-gray-800">Tech Pro X7</div>
-                      </div>
-                      <div className="grid grid-cols-2 py-3 border-b border-gray-200">
-                        <div className="font-medium text-gray-600">Release Year</div>
-                        <div className="text-gray-800">2025</div>
-                      </div>
-                      <div className="grid grid-cols-2 py-3 border-b border-gray-200">
-                        <div className="font-medium text-gray-600">Warranty</div>
-                        <div className="text-gray-800">1 Year</div>
-                      </div>
-                      <div className="grid grid-cols-2 py-3 border-b border-gray-200">
-                        <div className="font-medium text-gray-600">Dimensions</div>
-                        <div className="text-gray-800">15.2 x 7.3 x 0.7 cm</div>
-                      </div>
-                      <div className="grid grid-cols-2 py-3 border-b border-gray-200">
-                        <div className="font-medium text-gray-600">Weight</div>
-                        <div className="text-gray-800">180g</div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-bold text-lg mb-3 text-gray-800">BOX CONTENTS</h3>
-                    <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                      <li>Main Device</li>
-                      <li>Power Adapter</li>
-                      <li>Quick Start Guide</li>
-                      <li>USB-C Cable</li>
-                      <li>SIM Ejector Tool</li>
-                      <li>Warranty Card</li>
-                    </ul>
-                  </div>
-                </div>
-              )}
-              
-              {/* Reviews Tab */}
-              {activeTab === 'reviews' && (
-                <div>
-                  <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
-                    <div className="md:w-1/3 flex flex-col items-center justify-center">
-                      <div className="text-5xl font-bold text-gray-800">4.0</div>
-                      <div className="flex my-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star 
-                            key={star}
-                            size={20}
-                            className={star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
-                          />
-                        ))}
-                      </div>
-                      <div className="text-sm text-gray-500">Based on 24 reviews</div>
-                    </div>
-                    
-                    <div className="md:w-2/3 space-y-2">
-                      <div className="flex items-center">
-                        <span className="text-sm w-8">5★</span>
-                        <div className="flex-grow h-2 mx-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="bg-yellow-400 h-full rounded-full" style={{width: '65%'}}></div>
-                        </div>
-                        <span className="text-sm w-8 text-gray-500">65%</span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-sm w-8">4★</span>
-                        <div className="flex-grow h-2 mx-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="bg-yellow-400 h-full rounded-full" style={{width: '20%'}}></div>
-                        </div>
-                        <span className="text-sm w-8 text-gray-500">20%</span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-sm w-8">3★</span>
-                        <div className="flex-grow h-2 mx-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="bg-yellow-400 h-full rounded-full" style={{width: '10%'}}></div>
-                        </div>
-                        <span className="text-sm w-8 text-gray-500">10%</span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-sm w-8">2★</span>
-                        <div className="flex-grow h-2 mx-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="bg-yellow-400 h-full rounded-full" style={{width: '3%'}}></div>
-                        </div>
-                        <span className="text-sm w-8 text-gray-500">3%</span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-sm w-8">1★</span>
-                        <div className="flex-grow h-2 mx-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="bg-yellow-400 h-full rounded-full" style={{width: '2%'}}></div>
-                        </div>
-                        <span className="text-sm w-8 text-gray-500">2%</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="border-t border-gray-200 pt-6">
-                    <button 
-                      className="bg-[#0062ff] text-white py-3 px-6 rounded-md font-medium hover:bg-[#0048cc] transition-colors mb-8"
-                      onClick={() => setShowReviews(!showReviews)}
-                    >
-                      Write a Review
-                    </button>
-                    
-                    {showReviews && (
-                      <div className="bg-gray-50 p-6 rounded-lg mb-8">
-                        <h3 className="text-lg font-medium mb-4">Write Your Review</h3>
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Your Rating</label>
-                          <div className="flex">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star 
-                                key={star}
-                                size={24}
-                                className="cursor-pointer text-gray-300 hover:text-yellow-400"
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Review Title</label>
-                          <input 
-                            type="text" 
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0062ff] focus:border-transparent"
-                            placeholder="Give your review a title"
-                          />
-                        </div>
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Your Review</label>
-                          <textarea 
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0062ff] focus:border-transparent"
-                            rows="4"
-                            placeholder="Write your thoughts about this product"
-                          ></textarea>
-                        </div>
-                        <button className="bg-[#0062ff] text-white py-2 px-4 rounded-md font-medium hover:bg-[#0048cc] transition-colors">
-                          Submit Review
-                        </button>
-                      </div>
-                    )}
-                    
-                    {/* Sample Reviews */}
-                    <div className="space-y-6">
-                      <div className="border-b border-gray-200 pb-6">
-                        <div className="flex items-center mb-2">
-                          <div className="flex">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star 
-                                key={star}
-                                size={16}
-                                className={star <= 5 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
-                              />
-                            ))}
-                          </div>
-                          <span className="ml-2 font-medium">Excellent device!</span>
-                        </div>
-                        <p className="text-gray-600 mb-2">This product exceeded my expectations. The build quality is premium and it performs amazingly well for the price.</p>
-                        <div className="text-sm text-gray-500">
-                          <span className="font-medium">John D.</span> - April 15, 2025
-                        </div>
-                      </div>
-                      
-                      <div className="border-b border-gray-200 pb-6">
-                        <div className="flex items-center mb-2">
-                          <div className="flex">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star 
-                                key={star}
-                                size={16}
-                                className={star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
-                              />
-                            ))}
-                          </div>
-                          <span className="ml-2 font-medium">Great value for money</span>
-                        </div>
-                        <p className="text-gray-600 mb-2">I've been using this for about a month now and I'm very impressed with the quality. Would recommend to anyone looking for a reliable product.</p>
-                        <div className="text-sm text-gray-500">
-                          <span className="font-medium">Sarah M.</span> - April 3, 2025
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {productTabs.map((tab) => (
+                <div 
+                  key={tab.id} 
+                  className={activeTab === tab.id ? 'block' : 'hidden'}
+                  dangerouslySetInnerHTML={renderTabContent(tab.content)}
+                />
+              ))}
             </div>
           </div>
         </div>
-          
-        {/* Related Products */}
-        <div className="container mx-auto px-4 mt-12">
-          <h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((item) => (
-              <div key={item} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <div className="p-4">
-                  <div className="h-48 flex items-center justify-center mb-4">
-                    <img 
-                      src={product.images[0]} 
-                      alt={`Related product ${item}`}
-                      className="max-h-full max-w-full object-contain" 
-                    />
-                  </div>
-                  <h3 className="font-medium mb-2 text-gray-800">Related Product {item}</h3>
-                  <div className="flex items-center mb-2">
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star 
-                          key={star}
-                          size={12}
-                          className={star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-xs text-gray-500 ml-1">(18)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-gray-900">${(Math.random() * 100 + 99).toFixed(2)}</span>
-                    <button className="w-8 h-8 rounded-full bg-gray-100 hover:bg-[#0062ff] hover:text-white flex items-center justify-center transition-colors">
-                      <ShoppingCart size={14} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Values Section */}
-        {product.values && product.values.length > 0 && (
-          <div className="container mx-auto px-4 mt-12">
-            <div className="bg-white py-8 rounded-lg shadow-sm">
-              <h3 className="text-center font-bold text-xl mb-8">Product Features</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 max-w-4xl mx-auto text-center gap-6">
-                {product.values.map((value, index) => (
-                  <div key={index} className="flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div className="w-16 h-16 rounded-full bg-[#f0f7ff] flex items-center justify-center mb-3">
-                      <img src={value.img} alt={value.name} className="w-10 h-10 object-contain" />
-                    </div>
-                    <span className="font-medium text-gray-800">{value.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </>
   );

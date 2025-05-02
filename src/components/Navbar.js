@@ -1,52 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { Menu, Search, User, ShoppingCart, X, Zap, Heart, HelpCircle, MapPin, ChevronDown, Phone } from 'lucide-react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
+import { Menu, Search, User, ShoppingCart, X, Zap, Heart, HelpCircle, MapPin, ChevronDown, Phone, Camera, Tv } from 'lucide-react'
 import logo from '../utils/image/navbar_logo.png'
 import logo_mob from '../utils/image/navbar_mob.jpg'
 import { useCart } from '../context/CartContext';
 import MiniCart from './MiniCart';
 import { useNavigate } from 'react-router-dom';
 import productData from '../utils/data/product';
-
-const electronicNavbar = [
-  {
-    id: 1,
-    name: "Shop Categories",
-    link: "/",
-    subItems: [
-      { id: 1, name: "Smartphones & Accessories", link: "/trending?category=smartphones" },
-      { id: 2, name: "Laptops & Computers", link: "/trending?category=laptops" },
-      { id: 3, name: "Audio & Headphones", link: "/trending?category=audio" },
-      { id: 4, name: "TVs & Displays", link: "/trending?category=tvs" },
-      { id: 5, name: "Gaming & Consoles", link: "/trending?category=gaming" },
-      { id: 6, name: "Cameras", link: "/trending?category=cameras" },
-      { id: 7, name: "Smart Home", link: "/trending?category=smart-home" },
-      { id: 8, name: "Computer Parts", link: "/trending?category=computer-parts" },
-      { id: 9, name: "Wearable Tech", link: "/trending?category=wearables" },
-    ]
-  },
-  {
-    id: 3,
-    name: "Deals",
-    link: "/deals",
-    subItems: [
-      { id: 1, name: "Smartphone Flash Sale", link: "/deals/smartphone-sale" },
-      { id: 2, name: "Premium Laptop Offers", link: "/deals/laptop-deals" },
-      { id: 3, name: "Audio Equipment Special", link: "/deals/audio-special" },
-      { id: 4, name: "Entertainment Bundle", link: "/deals/entertainment-bundle" },
-    ]
-  },
-  // {
-  //   id: 4,
-  //   name: "Services",
-  //   link: "/services",
-  //   subItems: [
-  //     { id: 1, name: "Tech Support", link: "/services/support" },
-  //     { id: 2, name: "Protection Plans", link: "/services/protection" },
-  //     { id: 3, name: "Installation", link: "/services/installation" },
-  //     { id: 4, name: "Trade-In Program", link: "/services/trade-in" },
-  //   ]
-  // }
-];
+import navbar from '../utils/data/navbar'; // Import the centralized navigation data
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -61,15 +21,35 @@ const Navbar = () => {
   const searchInputRef = useRef(null);
   const suggestionsRef = useRef(null);
   const { cartItemCount, toggleCart } = useCart();
-
-  const allProducts = [];
-  productData.trendingpage.forEach(category => {
-    category.products.forEach(product => {
-      if (!allProducts.some(p => p.id === product.id)) {
-        allProducts.push(product);
+  const phoneRef = useRef(null);
+  const [showPhonePopup, setShowPhonePopup] = useState(false);
+  
+  // Get all products for search functionality
+  const allProducts = useMemo(() => {
+    // Start with main product data
+    let products = [...productData.productData];
+    
+    // Add products from trendingpage data
+    productData.trendingpage.forEach(category => {
+      if (category.products) {
+        category.products.forEach(product => {
+          // Check if product already exists to avoid duplicates
+          if (!products.some(p => p.id === product.id)) {
+            products.push(product);
+          }
+        });
       }
     });
-  });
+    
+    // Add product detail data
+    productData.productDetailData.forEach(product => {
+      if (!products.some(p => p.id === product.id)) {
+        products.push(product);
+      }
+    });
+    
+    return products;
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -98,14 +78,17 @@ const Navbar = () => {
     setSearchTerm(value);
     
     if (value.trim().length > 1) {
+      // Enhanced search logic to match products by title
       const suggestions = allProducts
-        .filter(product => 
-          product.title.toLowerCase().includes(value.toLowerCase())
-        )
+        .filter(product => {
+          const title = product.title ? product.title.toLowerCase() : '';
+          const searchValue = value.toLowerCase();
+          return title.includes(searchValue);
+        })
         .slice(0, 5);
       
       setSearchSuggestions(suggestions);
-      setShowSuggestions(true);
+      setShowSuggestions(suggestions.length > 0);
     } else {
       setSearchSuggestions([]);
       setShowSuggestions(false);
@@ -123,7 +106,12 @@ const Navbar = () => {
   };
   
   const handleSuggestionClick = (suggestion) => {
-    navigate(`/trending?search=${encodeURIComponent(suggestion.title.trim())}`);
+    // Navigate to product page if it has an ID, otherwise search for the title
+    if (suggestion.id) {
+      navigate(`/product/${suggestion.id}`);
+    } else {
+      navigate(`/trending?search=${encodeURIComponent(suggestion.title.trim())}`);
+    }
     setSearchTerm('');
     setShowSuggestions(false);
     setShowMobileSearch(false);
@@ -138,22 +126,44 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const handleCopyPhone = () => {
+    navigator.clipboard.writeText('+91 (903) 094-5444');
+    setShowPhonePopup(true);
+    
+    // Hide popup after 2 seconds
+    setTimeout(() => {
+      setShowPhonePopup(false);
+    }, 2000);
+  };
+
+
   return (
     <header className="sticky top-0 w-full z-50">
       <div className="w-full bg-[#121212] text-gray-300 py-1 px-2 sm:px-4 text-xs">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 ">
+            <a href='https://maps.app.goo.gl/qhUpTDLFPoBSH5d29' target="_blank" rel="noopener noreferrer" className='hover:text-orange-500 duration-200 '>
             <div className="hidden sm:flex items-center gap-1">
               <MapPin size={14} />
               <span>Store Locator</span>
             </div>
+            </a>
             <div className="flex items-center gap-1">
               <Phone size={14} />
-              <span>1-800-TECH-HELP</span>
+              <span 
+                    onClick={handleCopyPhone}
+                      className="cursor-pointer hover:text-orange-500 transition-colors"
+                      title="Click to copy phone number"
+                    >+91 (903) 094-5444</span>
+                    {showPhonePopup && (
+                      <div className="absolute top-5 left-48 transform -translate-x-1/2 bg-orange-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                        Phone number copied!
+                      </div>
+              )}
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 hover:text-orange-500">
             <a href="/contact" className="hover:text-white hidden sm:inline">Support</a>
           </div>
         </div>
@@ -192,7 +202,7 @@ const Navbar = () => {
                   />
                   <button 
                     type="submit" 
-                    className="p-2 text-white bg-[#0062ff] hover:bg-[#0052d9] rounded-r-md"
+                    className="p-2 text-white bg-orange-500 hover:bg-orange-300 rounded-r-md"
                   >
                     <Search size={20} />
                   </button>
@@ -257,7 +267,7 @@ const Navbar = () => {
       <nav className="bg-[#262626] text-white border-t border-[#333] hidden lg:block">
         <div className="container mx-auto px-4">
           <ul className="flex">
-            <li className="group relative">
+            {/* <li className="group relative">
               <a 
                 href="/flash-deals" 
                 className="flex items-center gap-1 py-3 px-4 font-medium text-[#ff3e3e] hover:bg-[#333]"
@@ -265,9 +275,9 @@ const Navbar = () => {
                 <Zap size={16} className="text-[#ff3e3e]" />
                 <span>Flash Deals</span>
               </a>
-            </li>
+            </li> */}
             
-            {electronicNavbar.map((category, index) => (
+            {navbar.map((category, index) => (
               <li 
                 key={category.id}
                 className="group relative"
@@ -275,7 +285,7 @@ const Navbar = () => {
                 onMouseLeave={() => setActiveCategory(null)}
               >
                 <a 
-                  href={category.link}
+                  // href={category.link}
                   className="flex items-center gap-1 py-3 px-4 hover:bg-[#333]"
                 >
                   <span>{category.name}</span>
@@ -305,7 +315,7 @@ const Navbar = () => {
               </li>
             ))}
             
-            <li className="ml-auto">
+            {/* <li className="ml-auto">
               <a 
                 href="/help" 
                 className="flex items-center gap-1 py-3 px-4 hover:bg-[#333]"
@@ -313,7 +323,7 @@ const Navbar = () => {
                 <HelpCircle size={16} />
                 <span>Help</span>
               </a>
-            </li>
+            </li> */}
           </ul>
         </div>
       </nav>
@@ -331,7 +341,7 @@ const Navbar = () => {
             />
             <button 
               type="submit" 
-              className="p-2 text-white bg-[#0062ff] hover:bg-[#0052d9] rounded-r-md"
+              className="p-2 text-white bg-orange-500 hover:bg-orange-300 rounded-r-md"
             >
               <Search size={18} />
             </button>
@@ -411,13 +421,13 @@ const Navbar = () => {
               />
               <button 
                 type="submit" 
-                className="p-3 text-white bg-[#0062ff] hover:bg-[#0052d9] rounded-r-md"
+                className="p-3 text-white bg-orange-500 hover:bg-orange-300 rounded-r-md"
               >
                 <Search size={20} />
               </button>
             </form>
             
-            <a 
+            {/* <a 
               href="/flash-deals" 
               className="flex items-center justify-between p-3 mb-4 bg-gradient-to-r from-[#5c0000] to-[#8a0000] rounded-md"
             >
@@ -426,10 +436,10 @@ const Navbar = () => {
                 <span className="font-bold text-white">Flash Deals</span>
               </div>
               <span className="text-white text-sm bg-[#ff3e3e] px-2 py-1 rounded">HOT</span>
-            </a>
+            </a> */}
             
             <div className="space-y-4">
-              {electronicNavbar.map(category => (
+              {navbar.map(category => (
                 <div key={category.id} className="border-b border-[#333] pb-3">
                   <div className="flex justify-between items-center mb-2">
                     <a href={category.link} className="text-white font-medium text-lg">

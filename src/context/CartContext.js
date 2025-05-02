@@ -57,10 +57,10 @@ export const CartProvider = ({ children }) => {
       product: product 
     });
     
-    // Hide notification after 3 seconds
+    // Hide notification after 1.5 seconds (reduced from 3 seconds)
     setTimeout(() => {
       setNotification({ show: false, product: null });
-    }, 3000);
+    }, 1500);
   };
   
   // Remove item from cart
@@ -124,7 +124,9 @@ const CartNotification = ({ product }) => {
   const cartContext = useContext(CartContext);
   
   const handleProceedToCheckout = () => {
-    // Use window.location instead of navigate to avoid Router context issues
+    // Close notification first by setting the state directly
+    cartContext.notification.show = false;
+    // Navigate to shipping page using window.location
     window.location.href = '/shipping';
   };
 
@@ -159,7 +161,7 @@ const CartNotification = ({ product }) => {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-              Added to Cart
+              Congratulations!
             </h3>
           </div>
           
@@ -178,6 +180,7 @@ const CartNotification = ({ product }) => {
             
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate mb-1">{product.title}</p>
+              <p className="text-xs text-green-600 mb-1">Successfully added to your cart!</p>
               <div className="flex justify-between items-center">
                 <span className="inline-flex items-center bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
                   Qty: {product.quantity || 1}
@@ -189,12 +192,12 @@ const CartNotification = ({ product }) => {
           
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row gap-3 mt-5">
-            <button 
+            {/* <button 
               onClick={handleContinueShopping}
               className="flex-1 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors duration-200"
             >
               Continue Shopping
-            </button>
+            </button> */}
             <button 
               onClick={handleProceedToCheckout}
               className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-colors duration-200 shadow-sm"
