@@ -123,6 +123,9 @@ export const displayRazorpayPayment = async (
           // Send order confirmation email
           await sendOrderConfirmationEmail(orderRef, response.razorpay_payment_id);
           
+          // Create and send shipment to Shiprocket
+          await createShiprocketOrder(orderRef, response.razorpay_payment_id, formData, cart, orderTotal, shippingCost, paymentMethod);
+          
           // Clear cart and pending checkout data
           clearCart();
           localStorage.removeItem('pendingCheckout');
@@ -216,6 +219,104 @@ export const displayRazorpayPayment = async (
     alert('Failed to open payment gateway. Please try again.');
     setPaymentProcessing(false);
     setIsSubmitting(false);
+  }
+};
+
+// Create and send shipment to Shiprocket
+export const createShiprocketOrder = async (orderRef, paymentId, formData, cart, orderTotal, shippingCost, paymentMethod) => {
+  try {
+    console.log("Creating Shiprocket order...");
+    
+    // Get Shiprocket token from localStorage
+    const shiprocketData = localStorage.getItem('shiprocketToken');
+    if (!shiprocketData) {
+      console.error("Shiprocket token not found");
+      return false;
+    }
+    
+    const { token, authStatus } = JSON.parse(shiprocketData);
+    if (authStatus !== 'success' || !token) {
+      console.error("Invalid Shiprocket token");
+      return false;
+    }
+    
+    // Format the cart items for Shiprocket
+    const orderItems = cart.map(item => ({
+      name: item.title,
+      sku: `SKU-${item.id}`,
+      units: item.quantity,
+      selling_price: typeof item.price === 'number' ? item.price : parseFloat(item.price.replace(/[^\d.]/g, '')),
+      discount: 0,
+      tax: 0,
+      hsn: 441122
+    }));
+    
+    // Format the date in yyyy-mm-dd format
+    const today = new Date();
+    const orderDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    // Create the order payload for Shiprocket
+    const orderData = {
+      order_id: orderRef,
+      order_date: orderDate,
+      pickup_location: "Primary",
+      channel_id: "",
+      comment: `Payment via ${paymentMethod}`,
+      billing_customer_name: `${formData.firstName} ${formData.lastName}`,
+      billing_last_name: formData.lastName,
+      billing_address: formData.address,
+      billing_address_2: "",
+      billing_city: formData.city,
+      billing_pincode: formData.pincode,
+      billing_state: formData.state,
+      billing_country: "India",
+      billing_email: formData.email,
+      billing_phone: formData.phone,
+      shipping_is_billing: true,
+      shipping_customer_name: `${formData.firstName} ${formData.lastName}`,
+      shipping_last_name: formData.lastName,
+      shipping_address: formData.address,
+      shipping_address_2: "",
+      shipping_city: formData.city,
+      shipping_pincode: formData.pincode,
+      shipping_state: formData.state,
+      shipping_country: "India",
+      shipping_email: formData.email,
+      shipping_phone: formData.phone,
+      order_items: orderItems,
+      payment_method: paymentMethod === 'cod' ? 'COD' : 'Prepaid',
+      shipping_charges: shippingCost,
+      giftwrap_charges: 0,
+      transaction_charges: 0,
+      total_discount: 0,
+      sub_total: orderTotal,
+      length: 10,
+      breadth: 10,
+      height: 10,
+      weight: 0.5
+    };
+    
+    // Call the Shiprocket API to create the order
+    const response = await fetch(`${API_URL}/shiprocket/create-order`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData)
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      console.log("Shiprocket order created successfully:", data);
+      return true;
+    } else {
+      console.error("Failed to create Shiprocket order:", data.message || data.error);
+      return false;
+    }
+  } catch (error) {
+    console.error("Error creating Shiprocket order:", error);
+    return false;
   }
 };
 

@@ -226,6 +226,9 @@ const Checkout = () => {
             // Send order confirmation email
             await sendOrderConfirmationEmail(orderRef, response.razorpay_payment_id);
             
+            // Create Shiprocket order
+            await createShiprocketOrder(orderRef, response.razorpay_payment_id);
+            
             // Clear cart and pending checkout data
             clearCart();
             localStorage.removeItem('pendingCheckout');
@@ -394,64 +397,6 @@ const Checkout = () => {
     }
   };
 
-  // Similar improvements for abandoned cart email function
-  const sendAbandonedCartEmail = async () => {
-    try {
-      if (!formData.email) return;
-      
-      // Format cart items into a proper products array structure for the email API
-      const products = cart.map(item => ({
-        name: item.title,
-        quantity: item.quantity,
-        price: (typeof item.price === 'number') ? item.price.toFixed(2) : item.price,
-        image: item.image
-      }));
-      
-      const orderDetails = {
-        orderNumber: `PENDING-${Date.now()}`,
-        products, // Send structured products array instead of just names
-        totalAmount: orderTotal,
-        currency: '₹'
-      };
-      
-      const customerDetails = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip: formData.pincode
-      };
-      
-      // Use direct fetch without AbortController
-      const response = await fetch(`${API_URL}/send-abandoned-order-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerEmail: formData.email,
-          orderDetails,
-          customerDetails
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log("Abandoned cart email response:", data);
-      
-      return data;
-    } catch (error) {
-      console.warn('Error sending abandoned cart email:', error.message || error);
-      // Silent fail for abandoned cart emails - non-critical functionality
-    }
-  };
-
   // Add a utility function to check API connection - with fixed error handling
   const checkApiConnection = async () => {
     try {
@@ -510,6 +455,51 @@ const Checkout = () => {
     
     if (validatePaymentForm()) {
       setIsSubmitting(true);
+      
+      try {
+        // First check Shiprocket authentication
+        console.log("Verifying Shiprocket authentication...");
+        const shiprocketResponse = await fetch(`${API_URL}/shiprocket/test-auth`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        const shiprocketData = await shiprocketResponse.json();
+        
+        if (!shiprocketData.success) {
+          console.warn("Shiprocket authentication failed:", shiprocketData.message);
+          // Continue with the order but log the warning
+          
+          // Store failure information in localStorage
+          localStorage.setItem('shiprocketToken', JSON.stringify({
+            error: shiprocketData.message,
+            timestamp: new Date().toISOString(),
+            authStatus: 'failed'
+          }));
+        } else {
+          console.log("Shiprocket authentication successful, token expires:", shiprocketData.tokenExpiresAt);
+          
+          // Save token details including the actual token in localStorage
+          localStorage.setItem('shiprocketToken', JSON.stringify({
+            token: shiprocketData.token, // Save the actual token
+            tokenExpiry: shiprocketData.tokenExpiresAt,
+            timestamp: new Date().toISOString(),
+            authStatus: 'success'
+          }));
+        }
+      } catch (error) {
+        // Log error but don't block payment process
+        console.error("Error checking Shiprocket authentication:", error);
+        
+        // Store error information in localStorage
+        localStorage.setItem('shiprocketToken', JSON.stringify({
+          error: error.message,
+          timestamp: new Date().toISOString(),
+          authStatus: 'failed'
+        }));
+      }
       
       // Simple API check without AbortController
       let isApiConnected = false;
@@ -624,6 +614,9 @@ const Checkout = () => {
           // Send order confirmation email
           await sendOrderConfirmationEmail(orderRef, 'CARD-PAYMENT');
           
+          // Create Shiprocket order
+          await createShiprocketOrder(orderRef, 'CARD-PAYMENT');
+          
           // Navigate to thank you page with all required data
           navigate('/thank-you', {
             state: {
@@ -659,6 +652,9 @@ const Checkout = () => {
           // Send order confirmation email
           await sendOrderConfirmationEmail(orderRef, 'COD');
           
+          // Create Shiprocket order
+          await createShiprocketOrder(orderRef, 'COD');
+          
           // Navigate to thank you page with all required data
           navigate('/thank-you', {
             state: {
@@ -678,6 +674,104 @@ const Checkout = () => {
           localStorage.removeItem('pendingCheckout');
         }, 1500);
       }
+    }
+  };
+
+  // Create Shiprocket Order
+  const createShiprocketOrder = async (orderRef, paymentId) => {
+    try {
+      console.log("Creating Shiprocket order...");
+      
+      // Get Shiprocket token from localStorage
+      const shiprocketData = localStorage.getItem('shiprocketToken');
+      if (!shiprocketData) {
+        console.error("Shiprocket token not found");
+        return false;
+      }
+      
+      const { token, authStatus } = JSON.parse(shiprocketData);
+      if (authStatus !== 'success' || !token) {
+        console.error("Invalid Shiprocket token");
+        return false;
+      }
+      
+      // Format the cart items for Shiprocket
+      const orderItems = cart.map(item => ({
+        name: item.title,
+        sku: `SKU-${item.id}`,
+        units: item.quantity,
+        selling_price: typeof item.price === 'number' ? item.price : parseFloat(item.price.replace(/[^\d.]/g, '')),
+        discount: 0,
+        tax: 0,
+        hsn: 441122
+      }));
+      
+      // Format the date in yyyy-mm-dd format
+      const today = new Date();
+      const orderDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      
+      // Create the order payload for Shiprocket
+      const orderData = {
+        order_id: orderRef,
+        order_date: orderDate,
+        pickup_location: "Primary",
+        channel_id: "",
+        comment: `Payment via ${paymentMethod}`,
+        billing_customer_name: `${formData.firstName} ${formData.lastName}`,
+        billing_last_name: formData.lastName,
+        billing_address: formData.address,
+        billing_address_2: "",
+        billing_city: formData.city,
+        billing_pincode: formData.pincode,
+        billing_state: formData.state,
+        billing_country: "India",
+        billing_email: formData.email,
+        billing_phone: formData.phone,
+        shipping_is_billing: true,
+        shipping_customer_name: `${formData.firstName} ${formData.lastName}`,
+        shipping_last_name: formData.lastName,
+        shipping_address: formData.address,
+        shipping_address_2: "",
+        shipping_city: formData.city,
+        shipping_pincode: formData.pincode,
+        shipping_state: formData.state,
+        shipping_country: "India",
+        shipping_email: formData.email,
+        shipping_phone: formData.phone,
+        order_items: orderItems,
+        payment_method: paymentMethod === 'cod' ? 'COD' : 'Prepaid',
+        shipping_charges: shippingCost,
+        giftwrap_charges: 0,
+        transaction_charges: 0,
+        total_discount: 0,
+        sub_total: orderTotal,
+        length: 10,
+        breadth: 10,
+        height: 10,
+        weight: 0.5
+      };
+      
+      // Call the Shiprocket API to create the order
+      const response = await fetch(`${API_URL}/shiprocket/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log("Shiprocket order created successfully:", data);
+        return true;
+      } else {
+        console.error("Failed to create Shiprocket order:", data.message || data.error);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error creating Shiprocket order:", error);
+      return false;
     }
   };
 
@@ -827,7 +921,7 @@ const Checkout = () => {
                       className="h-4 w-4 text-blue-600"
                     />
                     <span className="ml-2 flex items-center">
-                      <img src="https://cdn.razorpay.com/static/assets/logo/upi.svg" alt="UPI" className="w-4 h-4 mr-2" />
+                      <img src="https://razorpay.com/favicon.png" alt="UPI" className="w-4 h-4 mr-2" />
                       Pay via UPI (Google Pay, PhonePe, BHIM, Paytm)
                     </span>
                   </label>
@@ -843,7 +937,7 @@ const Checkout = () => {
                       className="h-4 w-4 text-purple-600"
                     />
                     <span className="ml-2 flex items-center">
-                      <img src="https://cdn.razorpay.com/static/assets/logo/card.svg" alt="EMI" className="w-4 h-4 mr-2" />
+                      {/* <img src="https://cdn.razorpay.com/static/assets/logo/card.svg" alt="EMI" className="w-4 h-4 mr-2" /> */}
                       Pay in EMI (Credit Card EMI, No Cost EMI)
                       {orderTotal >= 3000 && <span className="ml-2 px-2 py-1 text-xs bg-purple-600 text-white rounded-full">Available</span>}
                     </span>
@@ -871,12 +965,25 @@ const Checkout = () => {
                         You will be redirected to Razorpay's secure payment gateway to complete your purchase.
                       </p>
                     </div>
-                    <div className="flex flex-wrap gap-3 items-center justify-center">
+                    {/* <div className="flex flex-wrap gap-3 items-center justify-center">
                       <img src="https://cdn.razorpay.com/static/assets/logo/upi.svg" alt="UPI" className="h-8" />
                       <img src="https://cdn.razorpay.com/static/assets/logo/netbanking.svg" alt="Netbanking" className="h-8" />
                       <img src="https://cdn.razorpay.com/static/assets/logo/card.svg" alt="Card" className="h-8" />
                       <img src="https://cdn.razorpay.com/static/assets/logo/wallet.svg" alt="Wallet" className="h-8" />
+                    </div> */}
+                    <link
+                      rel="stylesheet"
+                      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+                    />
+                    <div class="flex flex-wrap gap-3 items-center justify-center">
+                      <i class="fab fa-cc-visa fa-2x"></i>
+                      <i class="fab fa-cc-mastercard fa-2x"></i>
+                      <i class="fab fa-cc-amex fa-2x"></i>
+                      <i class="fab fa-google-pay fa-2x"></i>
+                      <i class="fab fa-apple-pay fa-2x"></i>
+                      <i class="fab fa-amazon-pay fa-2x"></i>
                     </div>
+
                   </div>
                 )}
                 

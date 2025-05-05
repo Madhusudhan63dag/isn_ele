@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaLeaf, FaHeart, FaShieldAlt, FaCheck, FaMedal, FaCertificate } from 'react-icons/fa';
 import bannerData from '../utils/data/banner';
+import productData from '../utils/data/product'; // Fixed import path
 import SEO from '../components/SEO';
 
 const About = () => {
@@ -316,6 +317,46 @@ const About = () => {
                 Our Ayurvedic products are certified by AYUSH (Department of Ayurveda, Yoga & Naturopathy, Unani, Siddha and Homoeopathy).
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Video Testimonials Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-4">Customer Stories</h2>
+          <p className="text-gray-600 text-center max-w-3xl mx-auto mb-12">
+            Hear from our satisfied customers about their experiences with our products and services
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Map through testimonial videos from the data file */}
+            {productData.videos.testimonials.map((testimonial) => (
+              <div key={testimonial.id} className="rounded-lg overflow-hidden shadow-lg">
+                <div className="aspect-video bg-gray-200">
+                  <iframe 
+                    className="w-full h-full"
+                    src={`https://www.youtube.com/embed/${testimonial.videoId}`}
+                    title={`Customer Testimonial - ${testimonial.name}`} 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen>
+                  </iframe>
+                </div>
+                <div className="p-6 bg-white">
+                  <p className="text-gray-700 italic mb-4">"{testimonial.quote}"</p>
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                      <span className="text-blue-600 font-semibold text-xl">{testimonial.initials}</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold">{testimonial.name}</h4>
+                      <p className="text-sm text-gray-500">{testimonial.title}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

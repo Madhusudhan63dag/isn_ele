@@ -4,7 +4,7 @@ import { FaShippingFast, FaArrowLeft } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 
 // Add backend API URL - Fixed to properly use environment variables or fallback
-const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000');
+const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'https://razorpaybackend-wgbh.onrender.com');
 
 const Auth = () => {
   const { cart } = useCart();
@@ -48,6 +48,8 @@ const Auth = () => {
     }
   }, []);
 
+
+
   // Track when user leaves the page without completing the order
   useEffect(() => {
     return () => {
@@ -58,68 +60,71 @@ const Auth = () => {
       const orderSuccessFlag = sessionStorage.getItem('orderSuccessful');
       
       if (formTouched && formData.email && !orderSuccessFlag) {
-        sendAbandonedCartEmail();
+        // sendAbandonedCartEmail();
       }
     };
   }, [formData, formTouched]);
 
-  // Function to send abandoned cart email
-  const sendAbandonedCartEmail = async () => {
-    try {
-      if (!formData.email) return;
-      
-      // Format cart items into a proper products array structure for the email API
-      const products = cart.map(item => ({
-        name: item.title,
-        quantity: item.quantity,
-        price: (typeof item.price === 'number') ? item.price.toFixed(2) : item.price,
-        image: item.image
-      }));
 
-      // Calculate cart total
-      const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  
+
+  // Function to send abandoned cart email
+  // const sendAbandonedCartEmail = async () => {
+  //   try {
+  //     if (!formData.email) return;
       
-      const orderDetails = {
-        orderNumber: `PENDING-${Date.now()}`,
-        products,
-        totalAmount: cartTotal,
-        currency: '₹'
-      };
+  //     // Format cart items into a proper products array structure for the email API
+  //     const products = cart.map(item => ({
+  //       name: item.title,
+  //       quantity: item.quantity,
+  //       price: (typeof item.price === 'number') ? item.price.toFixed(2) : item.price,
+  //       image: item.image
+  //     }));
+
+  //     // Calculate cart total
+  //     const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
       
-      const customerDetails = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip: formData.pincode
-      };
+  //     const orderDetails = {
+  //       orderNumber: `PENDING-${Date.now()}`,
+  //       products,
+  //       totalAmount: cartTotal,
+  //       currency: '₹'
+  //     };
       
-      // Use direct fetch without AbortController
-      const response = await fetch(`${API_URL}/send-abandoned-order-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerEmail: formData.email,
-          orderDetails,
-          customerDetails
-        })
-      });
+  //     const customerDetails = {
+  //       firstName: formData.firstName,
+  //       lastName: formData.lastName,
+  //       email: formData.email,
+  //       phone: formData.phone,
+  //       address: formData.address,
+  //       city: formData.city,
+  //       state: formData.state,
+  //       zip: formData.pincode
+  //     };
       
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
-      }
+  //     // Use direct fetch without AbortController
+  //     const response = await fetch(`${API_URL}/send-abandoned-order-email`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         customerEmail: formData.email,
+  //         orderDetails,
+  //         customerDetails
+  //       })
+  //     });
       
-      console.log("Abandoned cart email sent for shipping page");
-    } catch (error) {
-      console.warn('Error sending abandoned cart email from shipping page:', error.message || error);
-      // Silent fail for abandoned cart emails - non-critical functionality
-    }
-  };
+  //     if (!response.ok) {
+  //       throw new Error(`Server responded with status: ${response.status}`);
+  //     }
+      
+  //     console.log("Abandoned cart email sent for shipping page");
+  //   } catch (error) {
+  //     console.warn('Error sending abandoned cart email from shipping page:', error.message || error);
+  //     // Silent fail for abandoned cart emails - non-critical functionality
+  //   }
+  // };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -162,10 +167,53 @@ const Auth = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (validateForm()) {
+      try {
+        // Test Shiprocket authentication before proceeding
+        console.log("Verifying Shiprocket authentication...");
+        const shiprocketResponse = await fetch(`${API_URL}/shiprocket/test-auth`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        const shiprocketData = await shiprocketResponse.json();
+        
+        if (shiprocketData.success) {
+          console.log("Shiprocket authentication successful, token expires:", shiprocketData.tokenExpiresAt);
+          
+          // Save token details including the actual token in localStorage
+          localStorage.setItem('shiprocketToken', JSON.stringify({
+            token: shiprocketData.token, // Save the actual token
+            tokenExpiry: shiprocketData.tokenExpiresAt,
+            timestamp: new Date().toISOString(),
+            authStatus: 'success'
+          }));
+        } else {
+          console.warn("Shiprocket authentication failed:", shiprocketData.message);
+          
+          // Store error information in localStorage
+          localStorage.setItem('shiprocketToken', JSON.stringify({
+            error: shiprocketData.message,
+            timestamp: new Date().toISOString(),
+            authStatus: 'failed'
+          }));
+        }
+      } catch (error) {
+        console.error("Error checking Shiprocket authentication:", error);
+        
+        // Store error information in localStorage
+        localStorage.setItem('shiprocketToken', JSON.stringify({
+          error: error.message,
+          timestamp: new Date().toISOString(),
+          authStatus: 'failed'
+        }));
+      }
+      
       // Save form data to localStorage
       const pendingCheckout = localStorage.getItem('pendingCheckout');
       let checkoutData = pendingCheckout ? JSON.parse(pendingCheckout) : {};

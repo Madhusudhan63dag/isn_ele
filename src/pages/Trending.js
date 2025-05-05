@@ -425,7 +425,7 @@ const Trending = () => {
               className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 flex flex-col" 
               onClick={() => handleProductClick(product.id)}
             >
-              <div className="relative h-56 bg-gray-100 p-4">
+              <div className="relative bg-gray-100">
                 <img 
                   src={product.imageUrl || product.url} 
                   alt={product.title} 

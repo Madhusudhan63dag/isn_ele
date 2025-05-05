@@ -23,6 +23,7 @@ import Terms from './pages/policy_other/Terms';
 import Sitemap from './pages/policy_other/Sitemap';
 import Auth from './components/Auth';
 
+
 // Import Cart Context
 import { CartProvider } from './context/CartContext';
 

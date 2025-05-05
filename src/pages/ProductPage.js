@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { FaHeart, FaFacebookF, FaTwitter, FaPinterestP, FaGoogle, FaInstagram } from 'react-icons/fa';
-import { Star, ShoppingCart, Truck, Shield, ArrowLeft, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { FaHeart, FaFacebookF, FaTwitter, FaPinterestP, FaGoogle, FaInstagram, FaVideo } from 'react-icons/fa';
+import { Star, ShoppingCart, Truck, Shield, ArrowLeft, ArrowRight, ChevronDown, ChevronUp, PhoneCall, AlertTriangle } from 'lucide-react';
 import productData from '../utils/data/product';
 import { useCart } from '../context/CartContext';
 import SEO from '../components/SEO';
@@ -51,6 +51,10 @@ const ProductPage = () => {
         images: product.images,
       }, quantity);
     }
+  };
+
+  const handleImageClick = (index) => {
+    setSelectedImage(index);
   };
 
   // Function to safely render HTML content from product tabs
@@ -182,7 +186,7 @@ const ProductPage = () => {
                           ? 'border-[#0062ff] shadow-md' 
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
-                      onClick={() => setSelectedImage(index)}
+                      onClick={() => handleImageClick(index)}
                     >
                       <img 
                         src={image} 
@@ -192,6 +196,25 @@ const ProductPage = () => {
                     </div>
                   ))}
                 </div>
+                
+                {/* Product Video Section */}
+                {product.videoUrl && (
+                  <div className="mt-6 border-t pt-4">
+                    <h3 className="font-medium mb-3 flex items-center text-gray-700">
+                      <FaVideo className="mr-2 text-[#0062ff]" /> Product Video
+                    </h3>
+                    <div className="rounded-lg overflow-hidden border border-gray-200">
+                      <iframe
+                        src={product.videoUrl}
+                        title={`${product.title} video demo`}
+                        className="w-full aspect-video"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Product Details */}
@@ -288,6 +311,17 @@ const ProductPage = () => {
                   </div>
                 </div>
                 
+                {/* Emergency SOS Feature Highlight */}
+                {product.title.toLowerCase().includes('vlog camera') && (
+                  <div className="flex items-center gap-3 bg-red-50 p-3 rounded-md mb-6">
+                    <AlertTriangle size={20} className="text-red-500" />
+                    <div>
+                      <p className="font-medium text-sm text-red-600">Emergency SOS Feature</p>
+                      <p className="text-xs text-red-500">Stay safe with built-in emergency SOS functionality.</p>
+                    </div>
+                  </div>
+                )}
+                
                 {/* Share */}
                 <div className="border-t border-gray-200 pt-6">
                   <div className="flex items-center space-x-4">
@@ -345,6 +379,54 @@ const ProductPage = () => {
                 />
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* NEW: Video Demonstration Section */}
+        <div className="container mx-auto px-4 mt-8">
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            {product.videoId && (
+              <div className="border-t border-gray-200 p-6">
+                <h2 className="text-2xl font-bold mb-6">See It In Action</h2>
+                <div className="aspect-video max-w-3xl mx-auto bg-black rounded-lg overflow-hidden shadow-lg">
+                  <iframe 
+                    className="w-full h-full"
+                    src={`https://www.youtube.com/embed/${product.videoId}`}
+                    title={`${product.title} - Video Demonstration`} 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen>
+                  </iframe>
+                </div>
+              </div>
+            )}
+            
+            {/* Additional Product Videos Section */}
+            {/* {product.additionalVideos && product.additionalVideos.length > 0 && (
+              <div className="border-t border-gray-200 p-6">
+                <h2 className="text-2xl font-bold mb-6">More Videos</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {product.additionalVideos.map(video => (
+                    <div key={video.id} className="bg-gray-50 rounded-lg overflow-hidden shadow-md">
+                      <div className="aspect-video">
+                        <iframe 
+                          className="w-full h-full"
+                          src={`https://www.youtube.com/embed/${video.videoId}`}
+                          title={video.title} 
+                          frameBorder="0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          allowFullScreen>
+                        </iframe>
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-bold text-gray-800 mb-1">{video.title}</h3>
+                        <p className="text-gray-600 text-sm">{video.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )} */}
           </div>
         </div>
       </div>

@@ -32,7 +32,7 @@ const Card2 = ({ card }) => {
 
   return (
     <div>
-        <div className='bg-white p-2 sm:p-3 md:p-5 rounded-lg shadow-sm'>
+        <div className='bg-white rounded-lg shadow-sm'>
             <div>
                 <div className="relative">
                     <img 

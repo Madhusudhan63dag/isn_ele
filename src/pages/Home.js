@@ -34,9 +34,6 @@ const Home = () => {
   const [itemOfWeekPosition, setItemOfWeekPosition] = useState(0);
   const navigate = useNavigate();
 
-
-  
-
   const handleProductClick = (productId) => {
     navigate(`/product/${productId}`);
   };
@@ -414,6 +411,54 @@ const Home = () => {
                 }}
                 aria-label={`Go to card group ${index + 1}`}
               />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* NEW: Video Showcase Section */}
+      <section className="py-12 bg-gradient-to-r from-blue-900 to-blue-700 text-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-4">See Our Products in Action</h2>
+            <p className="max-w-2xl mx-auto text-blue-100">Watch how our innovative products can transform your experience</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Map through featured videos from the data file */}
+            {productData.videos.featured.map((video) => (
+              <div key={video.id} className="bg-white rounded-lg overflow-hidden shadow-lg transition-transform hover:scale-105">
+                <div className="aspect-video">
+                  <iframe 
+                    className="w-full h-full"
+                    src={`https://www.youtube.com/embed/${video.videoId}`}
+                    title={video.title} 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen>
+                  </iframe>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-blue-900 mb-2">{video.title}</h3>
+                  <p className="text-gray-600 text-sm mb-3">{video.description}</p>
+                  {video.productId && (
+                    <a 
+                      href={`/product/${video.productId}`} 
+                      className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm transition-colors"
+                    >
+                      View Product
+                    </a>
+                  )}
+                  {!video.productId && (
+                    <a 
+                      href="/about" 
+                      className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm transition-colors"
+                    >
+                      Learn More
+                    </a>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         </div>

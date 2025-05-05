@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { FaCheckCircle, FaShippingFast, FaEnvelope, FaBox, FaHeadset, FaPhone, FaRegCreditCard } from 'react-icons/fa';
 import SEO from '../components/SEO';
 import productData from '../utils/data/product'; // Import product data
+import EmailService from '../services/EmailService'; // Import email service
 
 const ThankYou = () => {
   const navigate = useNavigate();
@@ -64,9 +65,14 @@ const ThankYou = () => {
     return () => clearTimeout(timer);
   }, [location.state, navigate, searchParams]);
   
-  // Clear pending checkout when component mounts
+  // Clear pending checkout and Shiprocket token when component mounts
   useEffect(() => {
+    // Remove pendingCheckout data
     localStorage.removeItem('pendingCheckout');
+    
+    // Remove Shiprocket token
+    localStorage.removeItem('shiprocketToken');
+    
     // Also clear the cart to be safe
     clearCart();
   }, [clearCart]);
@@ -84,6 +90,58 @@ const ThankYou = () => {
     
     return `${formatDate(start)} - ${formatDate(end)}`;
   };
+
+  // Function to send shipment tracking information when available
+  const sendShipmentTrackingInfo = async (orderData) => {
+    try {
+      if (!orderData || !orderData.formData || !orderData.formData.email) {
+        console.error("Cannot send tracking info: Missing order data or email");
+        return;
+      }
+
+      // In a real implementation, you would fetch tracking details from Shiprocket
+      // Here we're just showing the integration point
+      const trackingInfo = {
+        trackingId: `SR-${orderData.orderReference}`,
+        courier: "BlueDart", 
+        estimatedDelivery: getDeliveryDateRange(),
+        trackingUrl: `https://shiprocket.co/tracking/${orderData.orderReference}`
+      };
+
+      // Send the tracking email using the EmailService
+      const response = await EmailService.sendShipmentTrackingEmail(
+        orderData.formData.email,
+        {
+          orderNumber: orderData.orderReference,
+          orderDate: new Date().toLocaleDateString('en-IN'),
+          paymentMethod: orderData.paymentMethod,
+          items: orderData.cartItems
+        },
+        trackingInfo
+      );
+
+      if (response.success) {
+        console.log("Tracking information email sent successfully");
+      } else {
+        console.error("Failed to send tracking email:", response.message);
+      }
+    } catch (error) {
+      console.error("Error sending tracking information:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Check if we have order data
+    if (orderData) {
+      // In a real implementation, you would only call this once tracking is available
+      // For now, we'll just set a timeout to simulate getting tracking after a delay
+      const timer = setTimeout(() => {
+        sendShipmentTrackingInfo(orderData);
+      }, 10000); // Simulate 10 second delay after order placement
+      
+      return () => clearTimeout(timer);
+    }
+  }, [orderData]);
 
   // Show loading while getting order data
   if (!orderData) {
