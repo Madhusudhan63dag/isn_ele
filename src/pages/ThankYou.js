@@ -172,7 +172,7 @@ const ThankYou = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <SEO 
-        title="Order Confirmation - Thank You | GlowGlaz"
+        title="Order Confirmation - Thank You | IandI"
         description="Thank you for your purchase! Your order has been successfully placed."
         noindex={true}
       />
@@ -367,7 +367,7 @@ const ThankYou = () => {
                 </div>
               </div>
               <div className="flex gap-4">
-                <a href="mailto:support@glowglaz.com" className="text-blue-600 hover:text-blue-800 flex items-center">
+                <a href="mailto:support@IandI.com" className="text-blue-600 hover:text-blue-800 flex items-center">
                   <FaEnvelope className="mr-2" /> Email Support
                 </a>
                 <a href="tel:+919876543210" className="text-blue-600 hover:text-blue-800 flex items-center">

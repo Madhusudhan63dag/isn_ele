@@ -1,6 +1,6 @@
 import banner1 from '../image/banner/banner1.jpg';
 import banner2 from '../image/banner/banner2.jpg';
-
+import banner3 from '../image/banner/banner3.jpg';
 // Home page banners
 const homeBanners = [
   {
@@ -10,6 +10,10 @@ const homeBanners = [
   {
     id: 2,
     imageUrl: banner2,
+  },
+  {
+    id: 3,
+    imageUrl: banner3,
   }
 ];
 
@@ -185,8 +189,8 @@ const dealsBanners = {
 const aboutBanners = [
   {
     id: 1,
-    imageUrl: "https://placehold.co/1080x600/e8f5e9/43a047?text=About+GlowGlaz",
-    heading: "About GlowGlaz",
+    imageUrl: "https://placehold.co/1080x600/e8f5e9/43a047?text=About+IandI",
+    heading: "About IandI",
     subheading: "Natural wellness solutions for modern living"
   },
   {
@@ -201,7 +205,7 @@ const aboutBanners = [
 const contactBanners = [
   {
     id: 1,
-    imageUrl: "https://placehold.co/1080x600/e1f5fe/0288d1?text=Contact+GlowGlaz",
+    imageUrl: "https://placehold.co/1080x600/e1f5fe/0288d1?text=Contact+IandI",
     heading: "Contact Us",
     subheading: "We're here to help with all your wellness needs"
   },

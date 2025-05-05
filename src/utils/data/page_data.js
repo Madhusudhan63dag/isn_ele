@@ -1,23 +1,20 @@
-
-
-
 const productSupport = [
   {
-    title: "Ayurvedic Products",
-    description: "Questions about our Ayurvedic formulations, ingredients, or usage instructions? Our Ayurvedic specialists are here to help.",
-    email: "ayurveda@glowglaz.com",
+    title: "Camera Products",
+    description: "Questions about our vlog cameras, features, or usage instructions? Our camera specialists are here to help.",
+    email: "israelitesshopping171@gmail.com",
     color: "green"
   },
   {
-    title: "Health & Nutrition",
-    description: "Need guidance on our nutritional supplements, weight management, or joint health products? Consult our nutrition experts.",
-    email: "nutrition@glowglaz.com",
+    title: "Projector Support",
+    description: "Need guidance on our projector setup, streaming features, or connectivity? Consult our visual technology experts.",
+    email: "israelitesshopping171@gmail.com",
     color: "blue"
   },
   {
-    title: "Skincare Line",
-    description: "For all inquiries related to our PSORIGO skincare products, treatments, and personalized skin recommendations.",
-    email: "skincare@glowglaz.com",
+    title: "Technical Support",
+    description: "For all inquiries related to product troubleshooting, firmware updates, and general technical assistance.",
+    email: "israelitesshopping171@gmail.com",
     color: "teal"
   }
 ];
@@ -51,23 +48,23 @@ const faqData = [
     questions: [
       {
         id: 1,
-        question: "Are your products 100% organic?",
-        answer: "Most of our products contain organic ingredients, but not all products are 100% organic. Each product page lists all ingredients and highlights organic components where applicable. We prioritize natural, high-quality ingredients in all our formulations."
+        question: "What are the main features of the I & I Vlog Camera?",
+        answer: "The I & I Vlog Camera features 4K UHD video capture (3840 × 2160 @ 30 fps), 1080p @ 60 fps recording, a 2.4″ IPS touchscreen, 180° rotatable lens, infrared night-vision up to 10 meters, one-click SOS calling, 4G LTE live streaming capability, and dual storage with microSD (up to 256 GB) plus AES-256 cloud backup."
       },
       {
         id: 2,
-        question: "How do I know which product is right for me?",
-        answer: "We recommend reviewing the detailed product descriptions on each product page, which include information about benefits, ingredient profiles, and recommended uses. If you're still unsure, contact our customer support team who can help you choose based on your specific needs and concerns."
+        question: "What makes the I & I Portable Mini Projector special?",
+        answer: "The I & I Portable Mini Projector stands out with its ultra-portable design, HD 720P LCD projection, advanced Wi-Fi 6 and Bluetooth 5.0 connectivity, auto-keystone correction, multiple interface options (HDMI, USB, audio-out), built-in Android 13.0 OS with streaming apps, and 3W cavity-design speaker system."
       },
       {
         id: 3,
-        question: "Do your products have side effects?",
-        answer: "Our products are formulated to be gentle and safe for most users. However, individual reactions can vary based on personal sensitivities. We recommend reviewing the ingredients list for any known allergies and, if you have specific health concerns, consulting with your healthcare provider before starting any new supplement regimen."
+        question: "Are your products covered by warranty?",
+        answer: "Yes, all I & I products come with a standard 1-year manufacturer warranty that covers defects in materials and workmanship. Extended warranty options are available at checkout. For warranty claims or questions, please contact our customer support team with your order details."
       },
       {
         id: 4,
-        question: "How should I store my products?",
-        answer: "For optimal freshness and efficacy, store all products in a cool, dry place away from direct sunlight. Some products may have specific storage requirements, which will be indicated on the packaging. Supplements should generally be kept out of reach of children."
+        question: "How should I store and maintain my electronic devices?",
+        answer: "For optimal performance and longevity, store your devices in a cool, dry place away from direct sunlight and moisture. Clean displays and lenses with microfiber cloths only. For the vlog camera, ensure batteries are charged at least quarterly when not in use. The projector's LED lamp has a 30,000-hour lifespan and requires no replacement under normal use."
       }
     ]
   },
@@ -230,7 +227,7 @@ const returnPolicy = {
   process: {
     title: "Return Process",
     steps: [
-      "Contact our customer support team at returns@glowglaz.com to initiate a return",
+      "Contact our customer support team at returns@IandI.com to initiate a return",
       "Include your order number and reason for return in your email",
       "Our team will provide you with a Return Authorization (RA) number within 1-2 business days",
       "Pack the item(s) securely in their original packaging if possible",
@@ -298,7 +295,7 @@ const privacyPolicy = {
   lastUpdated: "November 15, 2023",
   introduction: {
     title: "Introduction",
-    content: "At GlowGlaz, we respect your privacy and are committed to protecting your personal data. This Privacy Policy will inform you about how we look after your personal data when you visit our website and tell you about your privacy rights and how the law protects you. Please read this Privacy Policy carefully before using our Services or submitting any personal data to us."
+    content: "At IandI, we respect your privacy and are committed to protecting your personal data. This Privacy Policy will inform you about how we look after your personal data when you visit our website and tell you about your privacy rights and how the law protects you. Please read this Privacy Policy carefully before using our Services or submitting any personal data to us."
   },
   sections: [
     {
@@ -428,9 +425,9 @@ const privacyPolicy = {
       title: "Contact Information",
       content: "To ask questions or comment about this privacy policy and our privacy practices, contact us at:",
       contactDetails: {
-        email: "privacy@glowglaz.com",
+        email: "privacy@IandI.com",
         phone: "+91 98765 43210",
-        address: "GlowGlaz Privacy Office, 123 Wellness Way, Ayurveda Heights, New Delhi, 110001, India"
+        address: "IandI Privacy Office, 123 Wellness Way, Ayurveda Heights, New Delhi, 110001, India"
       }
     }
   ]
@@ -441,13 +438,13 @@ const termsAndConditions = {
   lastUpdated: "December 1, 2023",
   introduction: {
     title: "Introduction",
-    content: "Welcome to GlowGlaz. By accessing or using our website, you agree to be bound by these Terms and Conditions, all applicable laws and regulations, and agree that you are responsible for compliance with any applicable local laws. If you do not agree with any of these terms, you are prohibited from using or accessing this site."
+    content: "Welcome to IandI. By accessing or using our website, you agree to be bound by these Terms and Conditions, all applicable laws and regulations, and agree that you are responsible for compliance with any applicable local laws. If you do not agree with any of these terms, you are prohibited from using or accessing this site."
   },
   sections: [
     {
       id: "acceptance",
       title: "Acceptance of Terms",
-      content: "These Terms and Conditions govern your use of the GlowGlaz website and the products and services offered by GlowGlaz. By accessing or using our website, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our website.",
+      content: "These Terms and Conditions govern your use of the IandI website and the products and services offered by IandI. By accessing or using our website, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our website.",
       points: [
         "We reserve the right to modify these Terms and Conditions at any time without prior notice",
         "Your continued use of our website following any changes constitutes your acceptance of the revised terms",
@@ -461,7 +458,7 @@ const termsAndConditions = {
       subsections: [
         {
           title: "Account Security",
-          content: "You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use ofyour account or any other breach of security."
+          content: "You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use of your account or any other breach of security."
         },
         {
           title: "Account Termination",
@@ -501,7 +498,7 @@ const termsAndConditions = {
     {
       id: "intellectual",
       title: "Intellectual Property",
-      content: "All content included on the website, such as text, graphics, logos, images, as well as the compilation thereof, and any software used on the website, is the property of GlowGlaz or its suppliers and is protected by copyright and other intellectual property laws.",
+      content: "All content included on the website, such as text, graphics, logos, images, as well as the compilation thereof, and any software used on the website, is the property of IandI or its suppliers and is protected by copyright and other intellectual property laws.",
       subsections: [
         {
           title: "Limited License",
@@ -516,7 +513,7 @@ const termsAndConditions = {
     {
       id: "liability",
       title: "Limitation of Liability",
-      content: "To the fullest extent permitted by applicable law, GlowGlaz shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from: ",
+      content: "To the fullest extent permitted by applicable law, IandI shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from: ",
       bullets: [
         "Your access to or use of or inability to access or use the website",
         "Any conduct or content of any third party on the website",
@@ -535,12 +532,12 @@ const termsAndConditions = {
     {
       id: "indemnification",
       title: "Indemnification",
-      content: "You agree to indemnify, defend, and hold harmless GlowGlaz, its officers, directors, employees, agents, licensors, and suppliers from and against all losses, expenses, damages, and costs, including reasonable attorneys' fees, resulting from any violation of these Terms and Conditions or any activity related to your account (including negligent or wrongful conduct) by you or any other person accessing the website using your account."
+      content: "You agree to indemnify, defend, and hold harmless IandI, its officers, directors, employees, agents, licensors, and suppliers from and against all losses, expenses, damages, and costs, including reasonable attorneys' fees, resulting from any violation of these Terms and Conditions or any activity related to your account (including negligent or wrongful conduct) by you or any other person accessing the website using your account."
     },
     {
       id: "governing-law",
       title: "Governing Law",
-      content: "These Terms and Conditions shall be governed by and construed in accordance with the laws of India, without giving effect to any principles of conflicts of law. You agree that any legal action or proceeding between you and GlowGlaz shall be brought exclusively in the courts located in New Delhi, India."
+      content: "These Terms and Conditions shall be governed by and construed in accordance with the laws of India, without giving effect to any principles of conflicts of law. You agree that any legal action or proceeding between you and IandI shall be brought exclusively in the courts located in New Delhi, India."
     },
     {
       id: "changes",
@@ -552,16 +549,13 @@ const termsAndConditions = {
       title: "Contact Information",
       content: "Questions about the Terms and Conditions should be sent to us at: ",
       contactDetails: {
-        email: "legal@glowglaz.com",
+        email: "legal@IandI.com",
         phone: "+91 98765 43210",
-        address: "GlowGlaz Legal Department, 123 Wellness Way, Ayurveda Heights, New Delhi, 110001, India"
+        address: "IandI Legal Department, 123 Wellness Way, Ayurveda Heights, New Delhi, 110001, India"
       }
     }
   ]
 };
-
-
-
 
 export default { 
   productSupport,

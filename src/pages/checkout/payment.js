@@ -85,7 +85,7 @@ export const displayRazorpayPayment = async (
     key: orderData.key,
     amount: orderData.order.amount,
     currency: orderData.order.currency,
-    name: 'GlowGlaz',
+    name: 'IandI',
     description: 'Thank you for your purchase!',
     order_id: orderData.order.id,
     handler: async function (response) {

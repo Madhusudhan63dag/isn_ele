@@ -183,8 +183,8 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-white">
       <SEO 
-        title="Contact Us - GlowGlaz"
-        description="Get in touch with the GlowGlaz team for questions about our Ayurvedic products, orders, or customer support. Find our contact details, hours, and location information."
+        title="Contact Us - IandI"
+        description="Get in touch with the IandI team for questions about our Ayurvedic products, orders, or customer support. Find our contact details, hours, and location information."
         canonical="https://myiandi.com/contact"
       />
       

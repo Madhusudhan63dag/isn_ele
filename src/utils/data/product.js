@@ -19,6 +19,9 @@ import project5 from '../image/product/old/product5.jpg'
 import project6 from '../image/product/old/product6.jpg'
 import project7 from '../image/product/old/product7.jpg'
 import project8 from '../image/product/old/product8.jpg'
+import project9 from '../image/product/projector1.jpg'
+import project10 from '../image/product/projector2.jpg'
+
 
 // Define category mappings to make filtering more dynamic
 const categoryMappings = {
@@ -33,7 +36,7 @@ const videos = {
   featured: [
     {
       id: 'vlog_camera_demo', 
-      title: 'I & I Vlog Camera Demonstration',
+      title: 'I & I Vlog Camera',
       description: '4K UHD video capture with live streaming - perfect for vloggers and content creators',
       videoId: 'AUWgODVa8Es', // Replace with actual YouTube video ID
       productId: 1,
@@ -41,11 +44,11 @@ const videos = {
     },
     {
       id: 'projector_demo',
-      title: 'I & I Portable Mini Projector Demo',
+      title: 'I & I Portable Mini Projector',
       description: 'HD resolution with built-in Android 13.0 - transform any space into your personal theater',
       videoId: 'mqwOBqXm-3E', // Replace with actual YouTube video ID
       productId: 2,
-      thumbnail: project3
+      thumbnail: project9
     },
     // {
     //   id: 'product_tutorials',
@@ -95,7 +98,7 @@ const trending = [
   {
     id: 'projectors',
     name: "I and I Portable Mini Projector",
-    imageUrl: project8,
+    imageUrl: project9,
     keywords: ["projector", "display", "cinema"] // Add keywords for more flexible matching
   }
 ] 
@@ -113,6 +116,8 @@ const productData = [
       { "id": 3, "title": "Infrared Night Vision", "url": "https://images.unsplash.com/photo-1509023464722-18d996393ca8?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" }
     ],
     "price": 5990,
+    "originalPrice": 8990, // Original price for discount calculation
+    "discount": 33, // Discount percentage
     "rating": 4.8,
     "reviews": 254,
     "videoId": "AUWgODVa8Es" // YouTube video ID for product demo
@@ -129,6 +134,8 @@ const productData = [
       { "id": 3, "title": "Android 13.0 OS", "url": "https://images.unsplash.com/photo-1633412802994-5c058f151b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" }
     ],
     "price": 6990,
+    "originalPrice": 12990, // Original price for discount calculation
+    "discount": 46, // Discount percentage
     "rating": 4.5,
     "reviews": 187,
     "videoId": "mqwOBqXm-3E" // YouTube video ID for product demo
@@ -236,13 +243,17 @@ const newproduct = [
     id: 1,
     name: "I & I Vlog Camera",
     image: vlog3,
-    price: 5990
+    price: 5990,
+    originalPrice: 8990, // Original price for discount calculation
+    discount: 33, // Discount percentage
   },
   {
     id: 2,
     name: "I & I Portable Mini Projector",
     image: project3,
-    price: 6990
+    price: 6990,
+    originalPrice: 12990, // Original price for discount calculation
+    discount: 46, // Discount percentage
   }
 ]
 

@@ -9,7 +9,7 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   // Load cart from localStorage if available
   const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem('glowglazCart');
+    const savedCart = localStorage.getItem('IandICart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
   
@@ -19,7 +19,7 @@ export const CartProvider = ({ children }) => {
   
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('glowglazCart', JSON.stringify(cart));
+    localStorage.setItem('IandICart', JSON.stringify(cart));
   }, [cart]);
   
   // Get total number of items in cart

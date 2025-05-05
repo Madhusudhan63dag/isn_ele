@@ -5,7 +5,7 @@ import news from '../utils/image/new.webp';
 const Card2 = ({ card }) => {
   const { addToCart } = useCart();
   const [fontSize, setFontSize] = useState('');
-  
+  console.log(card, 'card2');
   // Calculate font size based on text length
   useEffect(() => {
     if (card && card.name) {
@@ -30,6 +30,10 @@ const Card2 = ({ card }) => {
     });
   };
 
+  // Calculate discount percentage if originalPrice exists
+  const discountPercentage = card.originalPrice ? 
+    Math.round(((card.originalPrice - card.price) / card.originalPrice) * 100) : 0;
+
   return (
     <div>
         <div className='bg-white rounded-lg shadow-sm'>
@@ -40,6 +44,11 @@ const Card2 = ({ card }) => {
                       alt={card.name} 
                       className='w-full object-cover rounded-md' 
                     />
+                    {card.originalPrice && (
+                      <div className='absolute top-2 left-2 bg-red-500 text-white text-[10px] sm:text-xs px-1.5 py-0.5 rounded-md'>
+                        {discountPercentage}% OFF
+                      </div>
+                    )}
                     {/* <div className='absolute top-0 right-4'>
                       <div className="relative">
                         <img src={news} alt="Product" className='w-10 sm:w-12 md:w-auto' />
@@ -62,7 +71,15 @@ const Card2 = ({ card }) => {
                         </div>
                       )}
                     </div>
-                    <p className='mt-1 sm:mt-2 text-xs sm:text-sm text-gray-600'>Price: ₹{card.price}</p>
+                    <div className='mt-1 sm:mt-2 flex justify-center items-center gap-1.5'>
+                      <p className='text-xs sm:text-sm font-medium text-green-600'>₹{card.price}</p>
+                      {card.originalPrice && (
+                        <>
+                          <p className='text-[10px] sm:text-xs text-gray-500 line-through'>₹{card.originalPrice}</p>
+                          <p className='text-[10px] bg-green-100 text-green-800 px-1 py-0.5 rounded'>Save {discountPercentage}%</p>
+                        </>
+                      )}
+                    </div>
                     <button 
                       onClick={handleAddToCart}
                       className="w-full mt-2 sm:mt-3 bg-blue-600 hover:bg-blue-700 text-white py-1 sm:py-2 px-2 sm:px-4 rounded text-xs sm:text-sm flex items-center justify-center"

@@ -174,7 +174,7 @@ const Shipping = () => {
                 <h2 className="text-2xl font-bold text-gray-800">Shipping Policy</h2>
               </div>
               <p className="text-gray-700 mb-6">
-                At GlowGlaz, we strive to deliver your products quickly and safely. Please review our shipping policies below for detailed information about delivery options, timeframes, and costs.
+                At IandI, we strive to deliver your products quickly and safely. Please review our shipping policies below for detailed information about delivery options, timeframes, and costs.
               </p>
 
               {/* Domestic Shipping Section */}

@@ -479,7 +479,7 @@ const Home = () => {
               </div>
               <div>
                 <h3 className="font-medium">Free Shipping</h3>
-                <p className="text-sm text-gray-400">On orders over ₹50</p>
+                <p className="text-sm text-gray-400">On orders over ₹3000</p>
               </div>
             </div>
             

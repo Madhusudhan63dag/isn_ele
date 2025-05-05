@@ -126,9 +126,9 @@ const Privacy = () => {
   return (
     <div className="min-h-screen bg-white">
       <SEO 
-        title="Privacy Policy - GlowGlaz"
-        description="Learn how GlowGlaz protects your personal information and privacy. View our comprehensive privacy policy and data protection practices."
-        canonical="https://glowglaz.com/privacy"
+        title="Privacy Policy - IandI"
+        description="Learn how IandI protects your personal information and privacy. View our comprehensive privacy policy and data protection practices."
+        canonical="https://IandI.com/privacy"
       />
       
       {/* Banner Section */}
@@ -307,8 +307,8 @@ const Privacy = () => {
               <h3 className="font-bold text-lg mb-2">Questions About Our Privacy Practices?</h3>
               <p className="text-gray-700">
                 If you have any questions about this Privacy Policy, please contact our Data Protection Officer at{" "}
-                <a href="mailto:privacy@glowglaz.com" className="text-indigo-600 hover:underline">
-                  privacy@glowglaz.com
+                <a href="mailto:privacy@IandI.com" className="text-indigo-600 hover:underline">
+                  privacy@IandI.com
                 </a>
                 .
               </p>

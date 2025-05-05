@@ -187,7 +187,7 @@ const Checkout = () => {
       key: orderData.key,
       amount: orderData.order.amount,
       currency: orderData.order.currency,
-      name: 'GlowGlaz',
+      name: 'IandI',
       description: 'Thank you for your purchase!',
       order_id: orderData.order.id,
       handler: async function (response) {
@@ -798,8 +798,8 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <SEO 
-        title="Secure Checkout - GlowGlaz"
-        description="Complete your purchase securely on GlowGlaz. Your personal and payment information is protected with our secure checkout process."
+        title="Secure Checkout - IandI"
+        description="Complete your purchase securely on IandI. Your personal and payment information is protected with our secure checkout process."
         noindex={true}
       />
       

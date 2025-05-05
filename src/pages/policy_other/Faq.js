@@ -188,9 +188,9 @@ const Faq = () => {
   return (
     <div className="min-h-screen bg-white">
       <SEO 
-        title="Frequently Asked Questions - GlowGlaz"
-        description="Find answers to common questions about GlowGlaz products, shipping, returns, and more. Get the information you need about our natural Ayurvedic health solutions."
-        canonical="https://glowglaz.com/faq"
+        title="Frequently Asked Questions - IandI"
+        description="Find answers to common questions about IandI products, shipping, returns, and more. Get the information you need about our natural Ayurvedic health solutions."
+        canonical="https://IandI.com/faq"
       />
       
       {/* Banner Section */}
@@ -384,7 +384,7 @@ const Faq = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="mailto:support@glowglaz.com" 
+              href="mailto:support@IandI.com" 
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium"
             >
               Contact Support

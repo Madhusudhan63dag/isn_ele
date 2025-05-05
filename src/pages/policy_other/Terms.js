@@ -160,9 +160,9 @@ const Terms = () => {
   return (
     <div className="min-h-screen bg-white">
       <SEO 
-        title="Terms and Conditions - GlowGlaz"
-        description="Read the terms and conditions that govern the use of GlowGlaz products and services. Learn about our policies, user responsibilities, and legal guidelines."
-        canonical="https://glowglaz.com/terms"
+        title="Terms and Conditions - IandI"
+        description="Read the terms and conditions that govern the use of IandI products and services. Learn about our policies, user responsibilities, and legal guidelines."
+        canonical="https://IandI.com/terms"
       />
       
       <div className="container mx-auto px-4 py-8">
@@ -299,8 +299,8 @@ const Terms = () => {
               <h3 className="font-bold text-lg mb-2">Questions About Our Terms & Conditions?</h3>
               <p className="text-gray-700">
                 If you have any questions about these Terms and Conditions, please contact our legal team at{" "}
-                <a href="mailto:legal@glowglaz.com" className="text-blue-600 hover:underline">
-                  legal@glowglaz.com
+                <a href="mailto:legal@IandI.com" className="text-blue-600 hover:underline">
+                  legal@IandI.com
                 </a>
                 .
               </p>

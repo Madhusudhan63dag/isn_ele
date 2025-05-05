@@ -12,8 +12,8 @@ import { Helmet } from 'react-helmet-async';
  * @param {boolean} props.noindex - Whether to add noindex meta tag
  */
 const SEO = ({ 
-  title = 'GlowGlaz - Ayurvedic & Natural Health Products', 
-  description = 'Discover authentic Ayurvedic and natural health products at GlowGlaz. Shop our range of herbal supplements, skincare, and wellness solutions.', 
+  title = 'IandI - Ayurvedic & Natural Health Products', 
+  description = 'Discover authentic Ayurvedic and natural health products at IandI. Shop our range of herbal supplements, skincare, and wellness solutions.', 
   canonical = '',
   meta = {},
   noindex = false
