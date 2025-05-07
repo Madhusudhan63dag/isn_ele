@@ -58,11 +58,6 @@ const faqData = [
       },
       {
         id: 3,
-        question: "Are your products covered by warranty?",
-        answer: "Yes, all I & I products come with a standard 1-year manufacturer warranty that covers defects in materials and workmanship. Extended warranty options are available at checkout. For warranty claims or questions, please contact our customer support team with your order details."
-      },
-      {
-        id: 4,
         question: "How should I store and maintain my electronic devices?",
         answer: "For optimal performance and longevity, store your devices in a cool, dry place away from direct sunlight and moisture. Clean displays and lenses with microfiber cloths only. For the vlog camera, ensure batteries are charged at least quarterly when not in use. The projector's LED lamp has a 30,000-hour lifespan and requires no replacement under normal use."
       }
@@ -85,11 +80,6 @@ const faqData = [
       },
       {
         id: 3,
-        question: "How can I track my order?",
-        answer: "Once your order is shipped, you'll receive a tracking number via email. You can also track your order by logging into your account on our website and viewing your order history."
-      },
-      {
-        id: 4,
         question: "What if my order arrives damaged?",
         answer: "If you receive a damaged product, please contact our customer service team within 48 hours of delivery. Include your order number and photos of the damaged items, and we'll arrange for a replacement or refund."
       }
@@ -115,11 +105,6 @@ const faqData = [
         question: "When will I receive my refund?",
         answer: "Once we receive and process your return, refunds are typically issued within 5-7 business days. The refund will be credited back to the original payment method used for the purchase."
       },
-      {
-        id: 4,
-        question: "Do you offer exchanges?",
-        answer: "Yes, we do offer exchanges for products of equal value. If you wish to exchange for an item of different value, we'll process a refund for the returned item and you can place a new order for the desired item."
-      }
     ]
   },
   {
@@ -134,16 +119,6 @@ const faqData = [
       },
       {
         id: 2,
-        question: "Is it necessary to create an account to make a purchase?",
-        answer: "While creating an account is recommended for a better shopping experience and order tracking, we do offer a guest checkout option for those who prefer not to create an account."
-      },
-      {
-        id: 3,
-        question: "How do I reset my password?",
-        answer: "To reset your password, click on the 'Forgot Password' link on the login page. Enter your registered email address, and we'll send you instructions to reset your password."
-      },
-      {
-        id: 4,
         question: "Is my payment information secure?",
         answer: "Yes, all payment information is encrypted using industry-standard SSL technology. We do not store your complete credit card information on our servers."
       }

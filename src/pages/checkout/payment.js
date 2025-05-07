@@ -474,16 +474,6 @@ export const sendAbandonedCartEmail = async (formData, cart, orderTotal) => {
   }
 };
 
-// Check API connection
-export const checkApiConnection = async () => {
-  try {
-    const response = await fetch(`${API_URL}/server-metrics`);
-    return response.ok;
-  } catch (error) {
-    console.warn('API connection check failed:', error.message);
-    return false;
-  }
-};
 
 // Helper function to get delivery date range
 export const getDeliveryDateRange = () => {

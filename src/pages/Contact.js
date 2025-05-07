@@ -4,6 +4,11 @@ import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaClock, FaFacebook, FaTwitter,
 import productData from '../utils/data/page_data';
 import SEO from '../components/SEO';
 
+// Define API URL
+const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' 
+  ? 'https://razorpaybackend-wgbh.onrender.com' 
+  : 'https://razorpaybackend-wgbh.onrender.com');
+
 const Contact = () => {
   const location = useLocation();
   const [formData, setFormData] = useState({
@@ -119,32 +124,76 @@ const Contact = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitMessage({
-        type: 'success',
-        text: 'Thank you for your message. We will get back to you shortly!'
-      });
+    try {
+      // Get current domain info for tracking
+      const domainInfo = window.location.hostname;
       
-      // Reset form after successful submission
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: 'General Inquiry',
-        message: ''
+      // Prepare the email content
+      const emailContent = `
+        Message from contact form:
+        --------------------------
+        Name: ${formData.name}
+        Email: ${formData.email}
+        Phone: ${formData.phone || 'Not provided'}
+        Subject: ${formData.subject}
+        Message: ${formData.message}
+
+        Sent from: ${domainInfo}
+      `;
+
+      // Send the email using the API
+      const response = await fetch(`${API_URL}/send-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: "israelitesshopping171@gmail.com", // Use the recipient email from your backend
+          subject: `Contact Form: ${formData.subject}`,
+          message: emailContent
+        })
       });
 
-      // Clear success message after 5 seconds
+      const data = await response.json();
+
+      if (data.success) {
+        setSubmitMessage({
+          type: 'success',
+          text: 'Thank you for your message. We will get back to you shortly!'
+        });
+        
+        // Reset form after successful submission
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: 'General Inquiry',
+          message: ''
+        });
+      } else {
+        setSubmitMessage({
+          type: 'error',
+          text: 'There was an error sending your message. Please try again later.'
+        });
+      }
+    } catch (error) {
+      console.error('Error sending contact form:', error);
+      setSubmitMessage({
+        type: 'error',
+        text: 'There was an error sending your message. Please try again later.'
+      });
+    } finally {
+      setIsSubmitting(false);
+      
+      // Clear success/error message after 5 seconds
       setTimeout(() => {
         setSubmitMessage(null);
       }, 5000);
-    }, 1500);
+    }
   };
 
   // Render contact info item
@@ -418,22 +467,22 @@ const Contact = () => {
           <h2 className="text-3xl font-bold mb-6">Connect With Us</h2>
           
           <div className="flex justify-center space-x-6 mb-8">
-            <a href="#" className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all">
+            <a href="https://www.facebook.com/profile.php?id=61575830090610" className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all">
               <FaFacebook className="text-xl" />
             </a>
-            <a href="#" className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all">
+            <a href="https://x.com/myiandiofficial" className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all">
               <FaTwitter className="text-xl" />
             </a>
-            <a href="#" className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all">
+            <a href="https://www.instagram.com/myiandiofficial" className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all">
               <FaInstagram className="text-xl" />
             </a>
-            <a href="#" className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all">
+            <a href="https://www.youtube.com/@myiandiofficial" className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all">
               <FaYoutube className="text-xl" />
             </a>
           </div>
           
           <p className="max-w-2xl mx-auto">
-            Follow us on social media for the latest product updates, wellness tips, and exclusive offers. Join our community of wellness enthusiasts!
+            Follow us on social media for the latest product updates, and exclusive offers. Join our community of wellness enthusiasts!
           </p>
         </div>
       </section>

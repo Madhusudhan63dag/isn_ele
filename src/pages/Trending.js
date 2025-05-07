@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Card from '../components/Card';
 import productData from '../utils/data/product';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FaChevronLeft, FaChevronRight, FaStar, FaShoppingCart } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaStar, FaShoppingCart, FaPlay, FaTimes } from 'react-icons/fa';
 import banner1 from '../utils/image/banner/banner1.jpg';
 import banner2 from '../utils/image/banner/banner2.jpg';
 
@@ -16,7 +16,9 @@ const Trending = () => {
   const [animationPhase, setAnimationPhase] = useState('idle');
   const [prevBanner, setPrevBanner] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState(selectedCategoryParam || 'all');
-  const [sortOption, setSortOption] = useState('default');  
+  const [sortOption, setSortOption] = useState('default');
+  const [videoPopup, setVideoPopup] = useState(false);
+  const [currentVideo, setCurrentVideo] = useState(null);
   const trending = productData.trending;
   const allProducts = productData.productData;
   const trendingPageData = productData.trendingpage;
@@ -278,6 +280,23 @@ const Trending = () => {
     navigate(`/product/${productId}`);
   };
 
+  // Function to open video popup - updated for direct popup functionality
+  const openVideoPopup = (e, videoId) => {
+    e.stopPropagation(); // Prevent navigation to product page
+    setCurrentVideo(videoId);
+    setVideoPopup(true);
+    // Add no-scroll class to body
+    document.body.classList.add('overflow-hidden');
+  };
+
+  // Function to close video popup
+  const closeVideoPopup = () => {
+    setVideoPopup(false);
+    setCurrentVideo(null);
+    // Remove no-scroll class from body
+    document.body.classList.remove('overflow-hidden');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <section className="relative overflow-hidden">
@@ -436,6 +455,23 @@ const Trending = () => {
                     {product.discount}% OFF
                   </div>
                 )}
+                {product.videoId && (
+                  <div 
+                    className="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center cursor-pointer hover:bg-opacity-40 transition-all"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log(`Opening video for product ${product.id}: ${product.videoId}`);
+                      openVideoPopup(e, product.videoId);
+                    }}
+                    aria-label="Play video"
+                    data-product-id={product.id}
+                    data-video-id={product.videoId}
+                  >
+                    <div className="w-20 h-20 rounded-full bg-red-600 bg-opacity-90 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform">
+                      <FaPlay size={30} className="text-white ml-2" />
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="p-4 flex-grow flex flex-col">
                 <div className="mb-2 flex">
@@ -461,6 +497,21 @@ const Trending = () => {
                     >
                       View Details
                     </button>
+                    {product.videoId && (
+                      <button
+                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded flex items-center justify-center transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log(`Opening video from button for product ${product.id}: ${product.videoId}`);
+                          openVideoPopup(e, product.videoId);
+                        }}
+                        aria-label="Play video"
+                        data-product-id={product.id}
+                        data-video-id={product.videoId}
+                      >
+                        <FaPlay size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -477,6 +528,33 @@ const Trending = () => {
           </div>
         )}
       </section>
+
+      {videoPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4" onClick={closeVideoPopup}>
+          <div 
+            className="relative bg-black rounded-lg overflow-hidden shadow-2xl w-full max-w-5xl" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-4 right-4 text-white bg-red-600 hover:bg-red-700 rounded-full p-3 z-10 transition-colors"
+              onClick={closeVideoPopup}
+              aria-label="Close video"
+            >
+              <FaTimes size={20} />
+            </button>
+            <div className="relative pb-[56.25%] h-0">
+              <iframe
+                src={`https://www.youtube.com/embed/${currentVideo}?autoplay=1&rel=0`}
+                title="Product Video"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute top-0 left-0 w-full h-full"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

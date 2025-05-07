@@ -156,7 +156,7 @@ const Footer = () => {
               <div className="mb-6">
                 <h4 className="text-base font-medium mb-3 text-white">Connect With Us</h4>
                 <div className="flex space-x-3">
-                  <a href="https://www.facebook.com/people/Iandicompany-Ele/pfbid06gGxGPRZef5P714qioE5TPMWWxuCa9W9ehMsUXcUsmMLZdKAKhA8MXSvKF22nJvDl/" className="w-8 h-8 rounded-full bg-[#262626] hover:bg-orange-500 flex items-center justify-center transition-colors">
+                  <a href="https://www.facebook.com/profile.php?id=61575830090610" className="w-8 h-8 rounded-full bg-[#262626] hover:bg-orange-500 flex items-center justify-center transition-colors">
                     <Facebook size={16} />
                   </a>
                   <a href="https://www.instagram.com/myiandiofficial/" className="w-8 h-8 rounded-full bg-[#262626] hover:bg-orange-500 flex items-center justify-center transition-colors">

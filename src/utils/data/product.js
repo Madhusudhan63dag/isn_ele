@@ -38,7 +38,7 @@ const videos = {
       id: 'vlog_camera_demo', 
       title: 'I & I Vlog Camera',
       description: '4K UHD video capture with live streaming - perfect for vloggers and content creators',
-      videoId: 'AUWgODVa8Es', // Replace with actual YouTube video ID
+      videoId: 'mqwOBqXm-3E', // Replace with actual YouTube video ID
       productId: 1,
       thumbnail: vlog3
     },
@@ -46,7 +46,7 @@ const videos = {
       id: 'projector_demo',
       title: 'I & I Portable Mini Projector',
       description: 'HD resolution with built-in Android 13.0 - transform any space into your personal theater',
-      videoId: 'mqwOBqXm-3E', // Replace with actual YouTube video ID
+      videoId: 'AUWgODVa8Es', // Replace with actual YouTube video ID
       productId: 2,
       thumbnail: project9
     },
@@ -120,7 +120,7 @@ const productData = [
     "discount": 33, // Discount percentage
     "rating": 4.8,
     "reviews": 254,
-    "videoId": "AUWgODVa8Es" // YouTube video ID for product demo
+    "videoId": "mqwOBqXm-3E" // YouTube video ID for product demo - REVERSED
   },
   {
     "id": 2,
@@ -138,7 +138,7 @@ const productData = [
     "discount": 46, // Discount percentage
     "rating": 4.5,
     "reviews": 187,
-    "videoId": "mqwOBqXm-3E" // YouTube video ID for product demo
+    "videoId": "AUWgODVa8Es" // YouTube video ID for product demo - REVERSED
   }
 ]
 
@@ -185,7 +185,7 @@ const trendingpage = [
         "id": "vlog_overview",
         "title": "See the I & I Vlog Camera in Action",
         "description": "Watch our camera capture stunning 4K footage in various environments",
-        "videoId": "AUWgODVa8Es" // YouTube video ID
+        "videoId": "mqwOBqXm-3E" // YouTube video ID
       }
     ]
   },
@@ -231,7 +231,7 @@ const trendingpage = [
         "id": "projector_overview",
         "title": "I & I Mini Projector Showcase",
         "description": "See how our projector transforms any space into a personal theater",
-        "videoId": "mqwOBqXm-3E" // YouTube video ID
+        "videoId": "AUWgODVa8Es" // YouTube video ID
       }
     ]
   }
@@ -293,7 +293,7 @@ const productDetailData = [
       "Smart auto-save on power loss",
       "Professional-grade build"
     ],
-    "videoId": "AUWgODVa8Es", // Main product video for product page
+    "videoId": "mqwOBqXm-3E", // Main product video for product page
     "additionalVideos": [
       { 
         "id": "camera_features",
@@ -339,7 +339,7 @@ const productDetailData = [
       "Manual focus controls",
       "Ultra-portable design"
     ],
-    "videoId": "mqwOBqXm-3E", // Main product video for product page
+    "videoId": "AUWgODVa8Es", // Main product video for product page
     "additionalVideos": [
       { 
         "id": "projector_setup",

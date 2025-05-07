@@ -20,14 +20,14 @@ const Card = ({card}) => {
 
   return (
     <div className="w-full">
-        <a href="#">
+        {/* <a href="#"> */}
             <div className="card">
                 <div className="card-body w-full flex flex-col items-center justify-center p-2 sm:p-3 md:p-4 hover:scale-105 transition-transform duration-300 ease-in-out">
                     <div className="relative flex flex-col items-center w-full">
                         <img 
                             src={card.imageUrl} 
                             alt={card.name} 
-                            className='rounded-tr-[20px] sm:rounded-tr-[30px] md:rounded-tr-[40px] rounded-tl-[20px] sm:rounded-tl-[30px] md:rounded-tl-[40px] w-full h-40 sm:h-48 md:h-60 object-cover' />
+                            className='rounded-tr-[20px] sm:rounded-tr-[30px] md:rounded-tr-[40px] rounded-tl-[20px] sm:rounded-tl-[30px] md:rounded-tl-[40px] w-full h-40 sm:h-48 md:h-60 ' />
                         <div className='bg-slate-300 py-2 sm:py-3 md:py-5 px-2 sm:px-4 md:px-8 
                                        relative -top-3 sm:-top-4 md:-top-5 -z-10 
                                        rounded-br-[20px] sm:rounded-br-[30px] md:rounded-br-[40px] 
@@ -36,7 +36,7 @@ const Card = ({card}) => {
                             <div className="relative group">
                                 <span 
                                     ref={textRef}
-                                    className={`${fontSize} inline-block w-full truncate`}
+                                    className={`${fontSize} inline-block mt-3 w-full`}
                                     title={card.name} // Native HTML tooltip
                                 >
                                     {card.name}
@@ -53,7 +53,7 @@ const Card = ({card}) => {
                     </div>
                 </div>
             </div>
-        </a>
+        {/* </a> */}
     </div>
   )
 }
